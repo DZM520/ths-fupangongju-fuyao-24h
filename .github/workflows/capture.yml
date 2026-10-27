@@ -1,0 +1,540 @@
+name: fuyao-capture
+
+# 【一键版】只需要在仓库里新建这一个文件，内容全部粘贴进去即可
+# 前提：Settings → Secrets and variables → Actions → 新建 secret：FUYAO_API_KEY
+# 每小时整点抓一次（GitHub cron 可能在整点后延迟几分钟到十几分钟，属正常）
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fuyao-capture
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 写入抓取脚本（零依赖）
+        run: |
+          mkdir -p scripts/lib
+          cat > scripts/lib/store.mjs <<'STORE_EOF'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { fileURLToPath } from 'node:url';
+
+          const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+          export function recordsDir() {
+            return path.join(ROOT, 'data', 'records');
+          }
+          export function exportsDir() {
+            return path.join(ROOT, 'exports');
+          }
+          export function indexPath() {
+            return path.join(ROOT, 'data', 'index.json');
+          }
+          export function ensureDirs() {
+            fs.mkdirSync(recordsDir(), { recursive: true });
+            fs.mkdirSync(exportsDir(), { recursive: true });
+          }
+
+          export function readJson(file) {
+            try {
+              return JSON.parse(fs.readFileSync(file, 'utf8'));
+            } catch {
+              return null;
+            }
+          }
+
+          export function writeJson(file, data) {
+            fs.mkdirSync(path.dirname(file), { recursive: true });
+            fs.writeFileSync(file, JSON.stringify(data), 'utf8');
+          }
+
+          export function listRecordIds() {
+            try {
+              return fs
+                .readdirSync(recordsDir())
+                .filter((f) => /^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.json$/.test(f))
+                .map((f) => f.replace(/\.json$/, ''))
+                .sort();
+            } catch {
+              return [];
+            }
+          }
+
+          export function rebuildIndex() {
+            const ids = listRecordIds().slice().reverse();
+            const items = [];
+            for (const id of ids) {
+              const rec = readJson(path.join(recordsDir(), `${id}.json`));
+              if (!rec) continue;
+              items.push({ id, capturedAt: rec.capturedAt, count: rec.count ?? (rec.rows || []).length });
+            }
+            writeJson(indexPath(), { updatedAt: new Date().toISOString(), total: items.length, items });
+            return items;
+          }
+
+          export function pruneOld(days) {
+            if (!days || days <= 0) return 0;
+            const cutoff = Date.now() - days * 86400000;
+            let removed = 0;
+            for (const id of listRecordIds()) {
+              const d = Date.parse(`${id.slice(0, 10)}T00:00:00+08:00`);
+              if (Number.isFinite(d) && d < cutoff) {
+                try {
+                  fs.unlinkSync(path.join(recordsDir(), `${id}.json`));
+                  removed++;
+                } catch {}
+              }
+            }
+            return removed;
+          }
+          STORE_EOF
+          cat > scripts/lib/xlsx.mjs <<'XLSX_EOF'
+          /**
+           * 极简 XLSX 生成器（零依赖，store 打包）
+           * 支持：多工作表、内联字符串、数字、表头加粗、列宽
+           */
+
+          const CRC_TABLE = (() => {
+            const table = new Uint32Array(256);
+            for (let n = 0; n < 256; n++) {
+              let c = n;
+              for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+              table[n] = c >>> 0;
+            }
+            return table;
+          })();
+
+          function crc32(buf) {
+            let crc = 0xffffffff;
+            for (let i = 0; i < buf.length; i++) crc = CRC_TABLE[(crc ^ buf[i]) & 0xff] ^ (crc >>> 8);
+            return (crc ^ 0xffffffff) >>> 0;
+          }
+
+          function dosDateTime(d) {
+            const time = ((d.getHours() & 0x1f) << 11) | ((d.getMinutes() & 0x3f) << 5) | ((d.getSeconds() / 2) & 0x1f);
+            const date = (((d.getFullYear() - 1980) & 0x7f) << 9) | (((d.getMonth() + 1) & 0x0f) << 5) | (d.getDate() & 0x1f);
+            return { time, date };
+          }
+
+          function zipStore(entries) {
+            const { time, date } = dosDateTime(new Date());
+            const chunks = [];
+            const central = [];
+            let offset = 0;
+
+            for (const entry of entries) {
+              const nameBuf = Buffer.from(entry.name, 'utf8');
+              const data = Buffer.isBuffer(entry.data) ? entry.data : Buffer.from(entry.data, 'utf8');
+              const crc = crc32(data);
+
+              const lh = Buffer.alloc(30);
+              lh.writeUInt32LE(0x04034b50, 0);
+              lh.writeUInt16LE(20, 4);
+              lh.writeUInt16LE(0x0800, 6);
+              lh.writeUInt16LE(0, 8);
+              lh.writeUInt16LE(time, 10);
+              lh.writeUInt16LE(date, 12);
+              lh.writeUInt32LE(crc, 14);
+              lh.writeUInt32LE(data.length, 18);
+              lh.writeUInt32LE(data.length, 22);
+              lh.writeUInt16LE(nameBuf.length, 26);
+              lh.writeUInt16LE(0, 28);
+              chunks.push(lh, nameBuf, data);
+
+              const cd = Buffer.alloc(46);
+              cd.writeUInt32LE(0x02014b50, 0);
+              cd.writeUInt16LE(20, 4);
+              cd.writeUInt16LE(20, 6);
+              cd.writeUInt16LE(0x0800, 8);
+              cd.writeUInt16LE(0, 10);
+              cd.writeUInt16LE(time, 12);
+              cd.writeUInt16LE(date, 14);
+              cd.writeUInt32LE(crc, 16);
+              cd.writeUInt32LE(data.length, 20);
+              cd.writeUInt32LE(data.length, 24);
+              cd.writeUInt16LE(nameBuf.length, 28);
+              cd.writeUInt16LE(0, 30);
+              cd.writeUInt16LE(0, 32);
+              cd.writeUInt16LE(0, 34);
+              cd.writeUInt16LE(0, 36);
+              cd.writeUInt32LE(0, 38);
+              cd.writeUInt32LE(offset, 42);
+              central.push(cd, nameBuf);
+
+              offset += 30 + nameBuf.length + data.length;
+            }
+
+            const cdBuf = Buffer.concat(central);
+            const eocd = Buffer.alloc(22);
+            eocd.writeUInt32LE(0x06054b50, 0);
+            eocd.writeUInt16LE(0, 4);
+            eocd.writeUInt16LE(0, 6);
+            eocd.writeUInt16LE(entries.length, 8);
+            eocd.writeUInt16LE(entries.length, 10);
+            eocd.writeUInt32LE(cdBuf.length, 12);
+            eocd.writeUInt32LE(offset, 16);
+            eocd.writeUInt16LE(0, 20);
+
+            return Buffer.concat([...chunks, cdBuf, eocd]);
+          }
+
+          function xmlEsc(v) {
+            return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
+          }
+
+          function colName(index) {
+            let i = index + 1;
+            let s = '';
+            while (i > 0) {
+              const m = (i - 1) % 26;
+              s = String.fromCharCode(65 + m) + s;
+              i = Math.floor((i - 1) / 26);
+            }
+            return s;
+          }
+
+          function cellXml(ref, value, style) {
+            const s = style ? ` s="${style}"` : '';
+            if (value === null || value === undefined || value === '') return `<c r="${ref}"${s}/>`;
+            if (typeof value === 'number' && Number.isFinite(value)) return `<c r="${ref}"${s}><v>${value}</v></c>`;
+            return `<c r="${ref}" t="inlineStr"${s}><is><t xml:space="preserve">${xmlEsc(value)}</t></is></c>`;
+          }
+
+          function worksheetXml(rows, widths) {
+            const cols = (widths || []).map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('');
+            const rowXml = rows
+              .map((cells, r) => {
+                const style = r === 0 ? 1 : 0;
+                const cellsXml = cells.map((v, c) => cellXml(colName(c) + (r + 1), v, style)).join('');
+                return `<row r="${r + 1}">${cellsXml}</row>`;
+              })
+              .join('');
+            return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${
+              cols ? `<cols>${cols}</cols>` : ''
+            }<sheetData>${rowXml}</sheetData></worksheet>`;
+          }
+
+          const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+          <fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>
+          <fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>
+          <borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+          <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+          <cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>
+          <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+          </styleSheet>`;
+
+          function sanitizeSheetName(name, used) {
+            let base = String(name || 'Sheet').replace(/[\[\]:*?\/\\]/g, '-').slice(0, 31);
+            if (!base) base = 'Sheet';
+            let final = base;
+            let n = 2;
+            while (used.has(final)) {
+              const suffix = `_${n++}`;
+              final = base.slice(0, 31 - suffix.length) + suffix;
+            }
+            used.add(final);
+            return final;
+          }
+
+          export function buildWorkbook(sheets) {
+            const used = new Set();
+            const normalized = sheets.map((s) => ({
+              name: sanitizeSheetName(s.name, used),
+              rows: s.rows && s.rows.length ? s.rows : [['(空)']],
+              widths: s.widths || [],
+            }));
+
+            const entries = [];
+            entries.push({
+              name: '[Content_Types].xml',
+              data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+          <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+          <Default Extension="xml" ContentType="application/xml"/>
+          <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+          <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+          ${normalized.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}
+          </Types>`,
+            });
+
+            entries.push({
+              name: '_rels/.rels',
+              data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+          <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+          </Relationships>`,
+            });
+
+            entries.push({
+              name: 'xl/workbook.xml',
+              data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+          <sheets>${normalized.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets>
+          </workbook>`,
+            });
+
+            entries.push({
+              name: 'xl/_rels/workbook.xml.rels',
+              data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+          ${normalized.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}
+          <Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+          </Relationships>`,
+            });
+
+            entries.push({ name: 'xl/styles.xml', data: STYLES_XML });
+            normalized.forEach((s, i) => {
+              entries.push({ name: `xl/worksheets/sheet${i + 1}.xml`, data: worksheetXml(s.rows, s.widths) });
+            });
+
+            return zipStore(entries);
+          }
+          XLSX_EOF
+          cat > scripts/capture.mjs <<'CAP_EOF'
+          /**
+           * 同花顺热榜 · GitHub Actions 定时抓取
+           * 零依赖：只用 Node 内置 fetch / fs（Node >= 20）
+           *
+           * 环境变量：
+           *   FUYAO_API_KEY  必填，扶摇 API Key
+           *   TZ             可选，默认 Asia/Shanghai（脚本内也显式按东八区取时间）
+           *   KEEP_DAYS      可选，记录保留天数，默认 400；<=0 表示永久保留
+           *   DRY_RUN        可选，=1 时只抓取、不写文件
+           */
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { buildWorkbook } from './lib/xlsx.mjs';
+          import {
+            ensureDirs,
+            exportsDir,
+            listRecordIds,
+            pruneOld,
+            readJson,
+            rebuildIndex,
+            recordsDir,
+            writeJson,
+          } from './lib/store.mjs';
+
+          const FUYAO_BASE = 'https://fuyao.aicubes.cn';
+          const API_HOT = '/api/a-share/special-data/hot-stock-list';
+          const API_SNAP = '/api/a-share/prices/snapshot';
+          const TZ = process.env.TZ_OVERRIDE || 'Asia/Shanghai';
+          const SHEET_HEADER = ['排名', '股票代码', '股票名称', '现价', '当时涨幅(%)', '热度', '交易所', '抓取时间'];
+          const SHEET_WIDTHS = [6, 10, 12, 9, 11, 10, 6, 18];
+
+          const API_KEY = (process.env.FUYAO_API_KEY || '').trim();
+          const DRY_RUN = process.env.DRY_RUN === '1';
+          const KEEP_DAYS = Number(process.env.KEEP_DAYS || 400);
+
+          /* ---------------- 时间（显式东八区） ---------------- */
+          function nowParts() {
+            const fmt = new Intl.DateTimeFormat('en-CA', {
+              timeZone: TZ,
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hourCycle: 'h23',
+            });
+            const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]));
+            return {
+              date: `${parts.year}-${parts.month}-${parts.day}`,
+              hour: Number(parts.hour),
+              minute: Number(parts.minute),
+              time: `${parts.hour}:${parts.minute}`,
+              hh: parts.hour,
+              mm: parts.minute,
+            };
+          }
+          const pad = (n) => String(n).padStart(2, '0');
+
+          /* ---------------- API ---------------- */
+          async function apiGet(pathname, params) {
+            const url = new URL(pathname, FUYAO_BASE);
+            for (const [k, v] of Object.entries(params || {})) url.searchParams.set(k, v);
+            const resp = await fetch(url, {
+              headers: { 'X-api-key': API_KEY, Accept: 'application/json' },
+              signal: AbortSignal.timeout(25000),
+            });
+            const text = await resp.text();
+            if (resp.status === 401 || resp.status === 403) throw new Error(`HTTP ${resp.status} Key 无效或无权限: ${text.slice(0, 120)}`);
+            if (resp.status === 429) throw new Error('HTTP 429 调用频率超限');
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 160)}`);
+            let json;
+            try {
+              json = JSON.parse(text);
+            } catch {
+              throw new Error('返回不是 JSON: ' + text.slice(0, 120));
+            }
+            if (json.code !== 0) throw new Error(`API code=${json.code}: ${json.message || json.msg || '未知错误'}`);
+            return json.data;
+          }
+
+          function normalizeStock(it, i) {
+            const heat = it.heat ?? it.hot_value ?? it.hot ?? it.score ?? it.value;
+            const price = it.price ?? it.last_price ?? it.close_price ?? it.current_price;
+            const chg = it.changePct ?? it.change_pct ?? it.price_change_ratio_pct ?? it.pct_chg ?? it.change_ratio;
+            const thscode = it.thscode || '';
+            return {
+              rank: it.rank ?? i + 1,
+              ticker: it.ticker || '',
+              thscode,
+              name: it.name || '',
+              price: price != null && price !== '' ? Number(price) : null,
+              changePct: chg != null && chg !== '' ? Number(chg) : null,
+              heat: heat != null && heat !== '' ? Number(heat) : null,
+              exchange: thscode.endsWith('.SH') ? '沪' : thscode.endsWith('.SZ') ? '深' : thscode.endsWith('.BJ') ? '北' : '',
+            };
+          }
+
+          /* ---------------- 抓取 ---------------- */
+          async function capture() {
+            if (!API_KEY) throw new Error('缺少环境变量 FUYAO_API_KEY（仓库 Settings → Secrets → Actions）');
+
+            const t = nowParts();
+            const id = `${t.date}_${pad(t.hour)}-${pad(t.minute)}`;
+            const hourKey = `${t.date}_${pad(t.hour)}`;
+            const already = listRecordIds().some((x) => x.startsWith(hourKey));
+            if (already) {
+              console.log(`[skip] 本小时（${hourKey}）已有记录，跳过`);
+              return { skipped: true };
+            }
+
+            const hot = await apiGet(API_HOT, { period: 'hour', limit: '100' });
+            const list = hot && hot.item;
+            if (!Array.isArray(list)) throw new Error('热榜返回结构异常');
+            const rows = list.slice(0, 100).map(normalizeStock);
+
+            const thscodes = rows.map((s) => s.thscode).filter(Boolean).join(',');
+            if (thscodes) {
+              try {
+                const snap = await apiGet(API_SNAP, { thscodes });
+                const map = new Map(((snap && snap.item) || []).map((s) => [s.thscode, s]));
+                for (const s of rows) {
+                  const hit = map.get(s.thscode);
+                  if (hit) {
+                    if (hit.last_price != null) s.price = hit.last_price;
+                    if (hit.price_ratio_pct != null) s.changePct = hit.price_ratio_pct;
+                    if (hit.price_change_ratio_pct != null) s.changePct = hit.price_change_ratio_pct;
+                  }
+                }
+              } catch (e) {
+                console.warn('[warn] 行情快照失败（涨幅/现价可能为空）:', e.message);
+              }
+            }
+
+            const record = {
+              id,
+              sheetName: id,
+              capturedAt: `${t.date} ${t.time}`,
+              capturedAtIso: new Date().toISOString(),
+              timezone: TZ,
+              count: rows.length,
+              rows,
+            };
+
+            if (DRY_RUN) {
+              console.log(`[dry-run] ${id} 抓到 ${rows.length} 只，未写盘`);
+              return { dryRun: true, record };
+            }
+
+            ensureDirs();
+            writeJson(path.join(recordsDir(), `${id}.json`), record);
+            console.log(`[ok] 记录 ${id}：${rows.length} 只 → data/records/${id}.json`);
+            return { record };
+          }
+
+          /* ---------------- 生成当日 Excel ---------------- */
+          function buildDayWorkbook(date) {
+            const ids = listRecordIds().filter((id) => id.startsWith(date));
+            if (!ids.length) return null;
+
+            const indexRows = [['工作表', '抓取时间', '股票数']];
+            const sheets = [];
+            for (const id of ids) {
+              const rec = readJson(path.join(recordsDir(), `${id}.json`));
+              if (!rec) continue;
+              indexRows.push([rec.sheetName || id, rec.capturedAt || '', (rec.rows || []).length]);
+              const rows = [SHEET_HEADER.slice()];
+              for (const s of rec.rows || []) {
+                rows.push([
+                  s.rank ?? '',
+                  s.ticker || '',
+                  s.name || '',
+                  s.price != null && Number.isFinite(s.price) ? s.price : '',
+                  s.changePct != null && Number.isFinite(s.changePct) ? s.changePct : '',
+                  s.heat != null && Number.isFinite(s.heat) ? s.heat : '',
+                  s.exchange || '',
+                  rec.capturedAt || '',
+                ]);
+              }
+              sheets.push({ name: rec.sheetName || id, rows, widths: SHEET_WIDTHS });
+            }
+            if (!sheets.length) return null;
+            return buildWorkbook([{ name: '索引', rows: indexRows, widths: [22, 20, 8] }, ...sheets]);
+          }
+
+          function writeDayWorkbook(date) {
+            const buf = buildDayWorkbook(date);
+            if (!buf) return null;
+            const file = path.join(exportsDir(), `${date}.xlsx`);
+            fs.writeFileSync(file, buf);
+            const size = (buf.length / 1024).toFixed(0);
+            console.log(`[ok] 导出 exports/${date}.xlsx（${size} KB）`);
+            return file;
+          }
+
+          /* ---------------- 主流程 ---------------- */
+          try {
+            const r = await capture();
+            if (!DRY_RUN && !r.skipped) {
+              const t = nowParts();
+              const items = rebuildIndex();
+              console.log(`[ok] 索引已更新：共 ${items.length} 条记录`);
+              if (!r.dryRun) writeDayWorkbook(t.date);
+              const removed = pruneOld(KEEP_DAYS);
+              if (removed) console.log(`[ok] 清理 ${removed} 条超过 ${KEEP_DAYS} 天的记录`);
+            }
+          } catch (e) {
+            console.error('[fail]', e.message);
+            process.exit(1);
+          }
+          CAP_EOF
+
+      - name: 抓取热榜 + 生成当日 Excel
+        env:
+          FUYAO_API_KEY: ${{ secrets.FUYAO_API_KEY }}
+          TZ: Asia/Shanghai
+          KEEP_DAYS: "400"
+        run: node scripts/capture.mjs
+
+      - name: 提交结果
+        run: |
+          git config user.name "fuyao-bot"
+          git config user.email "fuyao-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "没有变化（可能本小时已抓过），跳过提交"
+          else
+            git commit -m "capture: $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
