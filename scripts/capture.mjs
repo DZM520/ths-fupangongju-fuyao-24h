@@ -4,7 +4,7 @@
  *
  * 环境变量：
  *   FUYAO_API_KEY  必填，扶摇 API Key
- *   TZ             可选，默认 Asia/Shanghai（脚本内也显式按东八区取时间）
+ *   TZ             可选，默认 Asia/Shanghai
  *   KEEP_DAYS      可选，记录保留天数，默认 400；<=0 表示永久保留
  *   DRY_RUN        可选，=1 时只抓取、不写文件
  */
@@ -16,6 +16,7 @@ import {
   exportsDir,
   listRecordIds,
   pruneOld,
+  pruneOldExports,
   readJson,
   rebuildIndex,
   recordsDir,
@@ -57,26 +58,39 @@ function nowParts() {
 }
 const pad = (n) => String(n).padStart(2, '0');
 
-/* ---------------- API ---------------- */
-async function apiGet(pathname, params) {
-  const url = new URL(pathname, FUYAO_BASE);
-  for (const [k, v] of Object.entries(params || {})) url.searchParams.set(k, v);
-  const resp = await fetch(url, {
-    headers: { 'X-api-key': API_KEY, Accept: 'application/json' },
-    signal: AbortSignal.timeout(25000),
-  });
-  const text = await resp.text();
-  if (resp.status === 401 || resp.status === 403) throw new Error(`HTTP ${resp.status} Key 无效或无权限: ${text.slice(0, 120)}`);
-  if (resp.status === 429) throw new Error('HTTP 429 调用频率超限');
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 160)}`);
-  let json;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    throw new Error('返回不是 JSON: ' + text.slice(0, 120));
+/* ---------------- API（加入重试机制） ---------------- */
+async function apiGet(pathname, params, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const url = new URL(pathname, FUYAO_BASE);
+      for (const [k, v] of Object.entries(params || {})) url.searchParams.set(k, v);
+      const resp = await fetch(url, {
+        headers: { 'X-api-key': API_KEY, Accept: 'application/json' },
+        signal: AbortSignal.timeout(25000),
+      });
+      const text = await resp.text();
+      
+      // 鉴权或限流错误直接抛出，不重试
+      if (resp.status === 401 || resp.status === 403) throw new Error(`HTTP ${resp.status} Key 无效或无权限: ${text.slice(0, 120)}`);
+      if (resp.status === 429) throw new Error('HTTP 429 调用频率超限');
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 160)}`);
+      
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error('返回不是 JSON: ' + text.slice(0, 120));
+      }
+      if (json.code !== 0) throw new Error(`API code=${json.code}: ${json.message || json.msg || '未知错误'}`);
+      return json.data;
+    } catch (e) {
+      if (i === retries - 1 || e.message.includes('HTTP 401') || e.message.includes('HTTP 403') || e.message.includes('HTTP 429')) {
+        throw e;
+      }
+      console.warn(`[retry] ${pathname} 第 ${i + 1} 次失败：${e.message}`);
+      await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+    }
   }
-  if (json.code !== 0) throw new Error(`API code=${json.code}: ${json.message || json.msg || '未知错误'}`);
-  return json.data;
 }
 
 function normalizeStock(it, i) {
@@ -96,19 +110,36 @@ function normalizeStock(it, i) {
   };
 }
 
-/* ---------------- 抓取 ---------------- */
+/* ---------------- 抓取（时间间隔去重逻辑） ---------------- */
 async function capture() {
   if (!API_KEY) throw new Error('缺少环境变量 FUYAO_API_KEY（仓库 Settings → Secrets → Actions）');
 
   const t = nowParts();
   const id = `${t.date}_${pad(t.hour)}-${pad(t.minute)}`;
-  const hourKey = `${t.date}_${pad(t.hour)}`;
-  const already = listRecordIds().some((x) => x.startsWith(hourKey));
-  if (already) {
-    console.log(`[skip] 本小时（${hourKey}）已有记录，跳过`);
-    return { skipped: true };
+  
+  // 【核心修改点】获取本地已有的记录列表，通过时间差判断
+  const existingIds = listRecordIds();
+  
+  if (existingIds.length > 0) {
+    const lastId = existingIds[existingIds.length - 1];
+    // 将 "YYYY-MM-DD_HH-mm" 转为时间戳（东八区）
+    const lastTime = new Date(lastId.replace('_', 'T') + ':00+08:00').getTime();
+    const now = new Date().getTime();
+    const gapMinutes = (now - lastTime) / (1000 * 60);
+
+    // 如果距离上次抓取不到 45 分钟，说明大概率是重复触发了，跳过
+    if (gapMinutes < 45) {
+      console.log(`[skip] 距离上次抓取 (${lastId}) 仅过去 ${gapMinutes.toFixed(0)} 分钟，跳过本次抓取`);
+      return { skipped: true };
+    }
+
+    // 如果距离上次抓取超过了 90 分钟，说明 GitHub 调度器吞了事件，记录警告
+    if (gapMinutes > 90) {
+      console.warn(`[warn] ⚠️ 数据断层！上一次抓取是 ${lastId}，距今已过去 ${gapMinutes.toFixed(0)} 分钟。`);
+    }
   }
 
+  // --- 以下为原有的抓取逻辑 ---
   const hot = await apiGet(API_HOT, { period: 'hour', limit: '100' });
   const list = hot && hot.item;
   if (!Array.isArray(list)) throw new Error('热榜返回结构异常');
@@ -123,8 +154,7 @@ async function capture() {
         const hit = map.get(s.thscode);
         if (hit) {
           if (hit.last_price != null) s.price = hit.last_price;
-          if (hit.price_ratio_pct != null) s.changePct = hit.price_ratio_pct;
-          if (hit.price_change_ratio_pct != null) s.changePct = hit.price_change_ratio_pct;
+          s.changePct = hit.price_change_ratio_pct ?? hit.price_ratio_pct ?? s.changePct;
         }
       }
     } catch (e) {
@@ -193,16 +223,24 @@ function writeDayWorkbook(date) {
   return file;
 }
 
-/* ---------------- 主流程 ---------------- */
+/* ---------------- 主流程（修复了索引与清理的顺序） ---------------- */
 try {
   const r = await capture();
   if (!DRY_RUN && !r.skipped) {
     const t = nowParts();
-    const items = rebuildIndex();
-    console.log(`[ok] 索引已更新：共 ${items.length} 条记录`);
-    if (!r.dryRun) writeDayWorkbook(t.date);
+    // 先清理旧数据
     const removed = pruneOld(KEEP_DAYS);
     if (removed) console.log(`[ok] 清理 ${removed} 条超过 ${KEEP_DAYS} 天的记录`);
+    
+    const removedXlsx = pruneOldExports(KEEP_DAYS);
+    if (removedXlsx) console.log(`[ok] 清理 ${removedXlsx} 个过期 Excel`);
+    
+    // 再重建索引
+    const items = rebuildIndex();
+    console.log(`[ok] 索引已更新：共 ${items.length} 条记录`);
+    
+    // 最后生成 Excel
+    if (!r.dryRun) writeDayWorkbook(t.date);
   }
 } catch (e) {
   console.error('[fail]', e.message);

@@ -28,7 +28,8 @@ export function readJson(file) {
 
 export function writeJson(file, data) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(data), 'utf8');
+  // 使用 Pretty Print 格式化，方便查看和 diff
+  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
 }
 
 export function listRecordIds() {
@@ -68,5 +69,22 @@ export function pruneOld(days) {
       } catch {}
     }
   }
+  return removed;
+}
+
+export function pruneOldExports(days) {
+  if (!days || days <= 0) return 0;
+  const cutoff = Date.now() - days * 86400000;
+  let removed = 0;
+  try {
+    for (const f of fs.readdirSync(exportsDir())) {
+      const m = f.match(/^(\d{4}-\d{2}-\d{2})\.xlsx$/);
+      if (!m) continue;
+      const d = Date.parse(`${m[1]}T00:00:00+08:00`);
+      if (Number.isFinite(d) && d < cutoff) {
+        try { fs.unlinkSync(path.join(exportsDir(), f)); removed++; } catch {}
+      }
+    }
+  } catch {}
   return removed;
 }
