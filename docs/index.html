@@ -45,28 +45,11 @@
   }
   .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
   .legend-hint { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-  .layout { display: grid; grid-template-columns: 1fr 240px; gap: 0; }
-  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); }
   .chart-box { position: relative; }
-  .side {
-    padding: 4px 0 4px 16px;
-    border-left: 1px solid var(--border);
-    max-height: 720px; overflow-y: auto;
-  }
-  @media (max-width: 860px) { .side { border-left: none; border-top: 1px solid var(--border); padding: 12px 0 0; max-height: none; } }
-  .side .s-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
-  .stock-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 5px 0; font-size: 13px;
-  }
-  .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
-  .rk { font-weight: 600; min-width: 26px; text-align: right; }
-  .nm { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pct { font-size: 12px; min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
   .up { color: var(--up); }
   .down { color: var(--down); }
   .flat { color: var(--muted); }
-  .out { color: var(--muted); font-size: 12px; }
   .footer { margin-top: 18px; text-align: center; color: var(--muted); font-size: 12px; }
   .empty { padding: 48px 0; text-align: center; color: var(--muted); }
   .times { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; }
@@ -102,35 +85,13 @@
   .panels .card { min-width: 0; margin-top: 0; }
   [hidden] { display: none !important; }
 
-  /* 并列时：当前名次列表移到图表下方横向排布，避免折线图被挤窄 */
-  .panels[data-view="split"] .layout { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .panels[data-view="split"] .side {
-    border-left: none; border-top: 1px solid var(--border);
-    padding: 10px 0 0; max-height: 190px; overflow-y: auto;
-  }
-  .panels[data-view="split"] #sideList { display: flex; flex-wrap: wrap; gap: 2px 14px; }
-  .panels[data-view="split"] .stock-row { flex: 0 0 auto; padding: 2px 0; font-size: 12px; }
-  .panels[data-view="split"] .nm { flex: 0 0 auto; max-width: 96px; }
-  .panels[data-view="split"] .pct { min-width: 46px; }
+  /* 并列双窗口：右侧表格撑满，与左窗口等高 */
   .panels[data-view="split"] .panel-snap { display: flex; flex-direction: column; }
   .panels[data-view="split"] .tablewrap { flex: 1 1 auto; min-height: 260px; max-height: none; }
 
   /* 窄屏：自动降为单栏，可用顶部按钮切换窗口 */
   @media (max-width: 1080px) {
     .panels[data-view="split"] { grid-template-columns: minmax(0, 1fr); }
-    .panels[data-view="split"] .layout { grid-template-columns: minmax(0, 1fr) 200px; gap: 0; }
-    .panels[data-view="split"] .side {
-      border-top: none; border-left: 1px solid var(--border);
-      padding: 4px 0 4px 14px; max-height: 620px;
-    }
-    .panels[data-view="split"] #sideList { display: block; }
-    .panels[data-view="split"] .stock-row { padding: 5px 0; font-size: 13px; }
-    .panels[data-view="split"] .nm { flex: 1; max-width: none; }
-  }
-  @media (max-width: 620px) {
-    .panels[data-view="split"] .layout,
-    .layout { grid-template-columns: minmax(0, 1fr); }
-    .side { border-left: none; border-top: 1px solid var(--border); padding: 10px 0 0; max-height: 200px; }
   }
 </style>
 </head>
@@ -158,14 +119,10 @@
   <div class="panels" id="panels" data-view="split">
     <div class="card panel-chart">
       <h2>热榜名次走势</h2>
-      <div class="legend-hint">线越高名次越靠前（第 1 名在最上方）；跌出榜单的线段会断开</div>
+      <div class="legend-hint">线越高名次越靠前（第 1 名在最上方）；右端贴着折线标注股票名与最新涨幅，跌出榜单的线段会断开</div>
       <div class="empty" id="empty" style="display:none">暂无数据，等待首次抓取…</div>
       <div class="layout" id="layout" style="display:none">
         <div class="chart-box"><canvas id="chart" role="img" aria-label="热榜排名变化折线图"></canvas></div>
-        <div class="side">
-          <div class="s-title">当前名次</div>
-          <div id="sideList"></div>
-        </div>
       </div>
     </div>
 
@@ -192,10 +149,12 @@
 
 <script>
 const UP = '#e24b4a', DOWN = '#1d9e75', MUTED = '#b4b2a9';
+const LABEL_W = 132;   // 图表右侧留给「股票名 + 涨幅」的宽度
 
 let chart = null;
 let curN = 20;
 let raw = null;
+let labelItems = [];   // 每条折线末端的标签（由 render 填充，插件绘制）
 
 function fmtPct(v) {
   if (v == null || !Number.isFinite(v)) return { txt: '-', cls: 'flat' };
@@ -216,6 +175,62 @@ function visibleStocks() {
   const list = (raw.stocks || []).filter((st) => st.bestRank <= curN);
   return list;
 }
+
+/* 在每条折线右端、与该线末端的高度对齐，画出「色点 + 股票名 + 涨幅」 */
+const endLabelPlugin = {
+  id: 'endLabels',
+  afterDatasetsDraw(c) {
+    const area = c.chartArea;
+    const ctx = c.ctx;
+    const x0 = area.right + 10;
+    const right = area.right + LABEL_W - 4;
+
+    // 直接取 Chart.js 实际画出来的那个点的 y，保证标签与折线末端严格同高
+    const items = labelItems.map((it, i) => {
+      const ds = c.data.datasets[i];
+      const meta = c.getDatasetMeta(i);
+      if (!ds || !meta) return { ...it, y: NaN };
+      const arr = ds.data || [];
+      let idx = -1;
+      for (let k = arr.length - 1; k >= 0; k--) {
+        if (arr[k] != null) { idx = k; break; }
+      }
+      const el = idx >= 0 && meta.data[idx] ? meta.data[idx] : null;
+      return { ...it, y: el && Number.isFinite(el.y) ? el.y : NaN };
+    }).filter((it) => Number.isFinite(it.y))
+      .sort((a, b) => a.y - b.y);
+
+    // 名次挨得太近时轻微下移，避免文字叠在一起
+    let prev = -Infinity;
+    for (const it of items) {
+      if (it.y - prev < 14) it.y = prev + 14;
+      prev = it.y;
+    }
+
+    ctx.save();
+    ctx.font = '11px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textBaseline = 'middle';
+    for (const it of items) {
+      if (it.y < area.top - 2 || it.y > area.bottom + 2) continue;
+      ctx.fillStyle = it.color;
+      ctx.beginPath();
+      ctx.arc(x0 + 3, it.y, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.textAlign = 'left';
+      ctx.fillStyle = it.out ? '#9b9b96' : '#1f1f1f';
+      ctx.fillText(it.name, x0 + 11, it.y, 62);
+      ctx.textAlign = 'right';
+      if (it.out) {
+        ctx.fillStyle = '#9b9b96';
+        ctx.fillText('跌出', right, it.y, 48);
+      } else {
+        ctx.fillStyle = it.pctCls === 'up' ? UP : it.pctCls === 'down' ? DOWN : MUTED;
+        ctx.fillText(it.pctTxt, right, it.y, 48);
+      }
+    }
+    ctx.restore();
+  }
+};
 
 function render() {
   const meta = document.getElementById('meta');
@@ -249,7 +264,25 @@ function render() {
     tension: 0.25,
   }));
 
-  const h = Math.max(340, Math.min(stocks.length * 22 + 70, 560));
+  // 每条线的末端名次 = 最后一个有值的点；标签就贴着这个高度画
+  labelItems = stocks.map((st) => {
+    const arr = st.ranks || [];
+    let rank = null;
+    for (let i = arr.length - 1; i >= 0; i--) {
+      if (arr[i] != null && Number.isFinite(arr[i])) { rank = arr[i]; break; }
+    }
+    const p = fmtPct(st.lastChangePct);
+    return {
+      name: st.name || st.ticker || '',
+      color: st.color,
+      rank,
+      pctTxt: p.txt,
+      pctCls: p.cls,
+      out: arr.length ? arr[arr.length - 1] == null : true,
+    };
+  });
+
+  const h = Math.max(420, Math.min(stocks.length * 25 + 80, 680));
   const box = document.getElementById('chart');
   box.parentElement.style.height = h + 'px';
 
@@ -261,6 +294,7 @@ function render() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { right: LABEL_W } },
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
@@ -290,21 +324,9 @@ function render() {
           }
         }
       }
-    }
+    },
+    plugins: [endLabelPlugin]
   });
-
-  // 右侧当前名次列表
-  const side = document.getElementById('sideList');
-  side.innerHTML = stocks.map((st) => {
-    const p = fmtPct(st.lastChangePct);
-    const inNow = st.lastRank != null;
-    return '<div class="stock-row">' +
-      '<span class="dot" style="background:' + st.color + '"></span>' +
-      '<span class="rk">' + (inNow ? '#' + st.lastRank : '') + '</span>' +
-      '<span class="nm ' + (inNow ? '' : 'out') + '">' + (st.name || st.ticker) + (inNow ? '' : ' <span class="out">(跌出)</span>') + '</span>' +
-      '<span class="pct ' + p.cls + '">' + p.txt + '</span>' +
-      '</div>';
-  }).join('');
 }
 
 async function load() {
