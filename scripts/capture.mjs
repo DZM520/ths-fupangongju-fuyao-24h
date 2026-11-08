@@ -333,6 +333,45 @@ function writeBump() {
   return file;
 }
 
+/* ---------------- 各时刻完整榜单快照（看板在线查看用） ---------------- */
+export function writeSnapshots(maxTimes = 24) {
+  const ids = listRecordIds();
+  const picked = ids.slice(-maxTimes);
+
+  // 用数组代替对象压缩体积：每行 [排名, 代码, 名称, 现价, 涨幅, 热度, 市场]
+  const snapshots = [];
+  for (const id of picked) {
+    const rec = readJson(path.join(recordsDir(), `${id}.json`));
+    if (!rec || !Array.isArray(rec.rows)) continue;
+    snapshots.push({
+      time: rec.capturedAt || '',
+      rows: rec.rows.map((s) => [
+        s.rank,
+        s.ticker || '',
+        s.name || '',
+        s.price != null && Number.isFinite(s.price) ? Math.round(s.price * 100) / 100 : null,
+        s.changePct != null && Number.isFinite(s.changePct) ? Math.round(s.changePct * 100) / 100 : null,
+        s.heat != null && Number.isFinite(s.heat) ? Math.round(s.heat) : null,
+        s.exchange || '',
+      ]),
+    });
+  }
+
+  const data = {
+    updatedAt: new Date().toISOString(),
+    fields: ['rank', 'code', 'name', 'price', 'chg', 'heat', 'ex'],
+    total: snapshots.length,
+    snapshots,
+  };
+  // 快照体积较大，用紧凑 JSON（不格式化）写入
+  const json = JSON.stringify(data);
+  fs.writeFileSync(path.join(recordsDir(), '..', 'snapshots.json'), json, 'utf8');
+  const root = path.resolve(recordsDir(), '..', '..');
+  fs.writeFileSync(path.join(root, 'docs', 'snapshots.json'), json, 'utf8');
+  console.log(`[ok] 生成榜单快照 docs/snapshots.json（${snapshots.length} 个时刻 / ${(json.length / 1024).toFixed(0)} KB）`);
+  return data;
+}
+
 /* ---------------- 主流程（修复了索引与清理的顺序） ---------------- */
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
@@ -354,6 +393,9 @@ if (isMain) {
 
       // 再生成排名时序数据
       writeBump();
+
+      // 再生成各时刻榜单快照（看板在线查看）
+      writeSnapshots();
 
       // 最后生成 Excel
       if (!r.dryRun) writeDayWorkbook(t.date);

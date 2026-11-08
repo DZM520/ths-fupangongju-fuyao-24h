@@ -68,6 +68,16 @@
   .out { color: var(--muted); font-size: 12px; }
   .footer { margin-top: 18px; text-align: center; color: var(--muted); font-size: 12px; }
   .empty { padding: 48px 0; text-align: center; color: var(--muted); }
+  .times { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; }
+  .times::-webkit-scrollbar { height: 6px; }
+  .times::-webkit-scrollbar-thumb { background: #d8d8d3; border-radius: 3px; }
+  .times button {
+    flex: 0 0 auto; border: 1px solid var(--border); background: var(--card);
+    color: var(--muted); padding: 4px 10px; border-radius: 7px;
+    font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .times button.on { background: #185fa5; border-color: #185fa5; color: #fff; }
+  .tablewrap { max-height: 520px; overflow: auto; border-top: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -98,7 +108,24 @@
     </div>
   </div>
 
-  <div class="footer">数据来源：同花顺热榜 · docs/bump.json · 每只股票颜色固定不变</div>
+  <div class="card" id="snapCard" style="margin-top:16px; display:none">
+    <h2>榜单明细</h2>
+    <div class="legend-hint">点选时刻，查看当时完整的 100 只热榜股票</div>
+    <div class="times" id="snapTimes"></div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>代码</th><th>名称</th>
+            <th class="num">现价</th><th class="num">涨幅</th><th class="num">热度</th><th>市场</th>
+          </tr>
+        </thead>
+        <tbody id="snapBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">数据来源：同花顺热榜 · docs/bump.json · docs/snapshots.json · 每只股票颜色固定不变</div>
 </div>
 
 <script>
@@ -238,7 +265,69 @@ document.getElementById('seg').addEventListener('click', (ev) => {
   if (raw) render();
 });
 
+/* ---------------- 榜单明细（在线查看） ---------------- */
+function fmtHeat(v) {
+  if (v == null || !Number.isFinite(v)) return '-';
+  return v >= 10000 ? (v / 10000).toFixed(1) + '万' : String(Math.round(v));
+}
+
+let snaps = null;
+let snapIdx = -1;
+
+function renderSnapTimes() {
+  const box = document.getElementById('snapTimes');
+  box.innerHTML = snaps.snapshots.map((s, i) => {
+    const t = shortTime(s.time);
+    return '<button data-i="' + i + '"' + (i === snapIdx ? ' class="on"' : '') + '>' + t + '</button>';
+  }).join('');
+  const on = box.querySelector('button.on');
+  if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
+function renderSnapTable() {
+  const s = snaps.snapshots[snapIdx];
+  if (!s) return;
+  const tbody = document.getElementById('snapBody');
+  tbody.innerHTML = s.rows.map((r) => {
+    const rank = r[0], code = r[1], name = r[2], price = r[3], chg = r[4], heat = r[5], ex = r[6];
+    const p = fmtPct(chg);
+    return '<tr>' +
+      '<td><span class="rk' + (rank <= 3 ? ' top' : '') + '">' + (rank != null ? rank : '') + '</span></td>' +
+      '<td>' + (code || '-') + '</td>' +
+      '<td>' + (name || '-') + '</td>' +
+      '<td class="num">' + (price != null ? price.toFixed(2) : '-') + '</td>' +
+      '<td class="num ' + p.cls + '">' + p.txt + '</td>' +
+      '<td class="num">' + fmtHeat(heat) + '</td>' +
+      '<td>' + (ex || '') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+async function loadSnaps() {
+  try {
+    const r = await fetch('./snapshots.json', { cache: 'no-store' });
+    if (!r.ok) return;
+    snaps = await r.json();
+    if (!snaps.snapshots || !snaps.snapshots.length) return;
+    snapIdx = snaps.snapshots.length - 1;
+    document.getElementById('snapCard').style.display = 'block';
+    renderSnapTimes();
+    renderSnapTable();
+  } catch (e) {
+    console.warn('snapshots 加载失败:', e);
+  }
+}
+
+document.getElementById('snapTimes').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('button');
+  if (!btn) return;
+  snapIdx = parseInt(btn.dataset.i, 10);
+  renderSnapTimes();
+  renderSnapTable();
+});
+
 load();
+loadSnaps();
 </script>
 </body>
 </html>
