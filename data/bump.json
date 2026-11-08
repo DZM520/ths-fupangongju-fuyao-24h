@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-08T06:45:16.522Z",
+  "updatedAt": "2026-11-08T07:30:19.737Z",
   "windowHours": 24,
   "topN": 30,
   "times": [
@@ -11,9 +11,10 @@
     "2026-11-08 13:56",
     "2026-11-08 13:57",
     "2026-11-08 14:00",
-    "2026-11-08 14:45"
+    "2026-11-08 14:45",
+    "2026-11-08 15:30"
   ],
-  "total": 37,
+  "total": 38,
   "stocks": [
     {
       "ticker": "002086",
@@ -29,31 +30,12 @@
         1,
         1,
         1,
+        1,
         1
       ],
       "lastRank": 1,
       "lastChangePct": 9.972299,
       "bestRank": 1
-    },
-    {
-      "ticker": "002242",
-      "name": "九阳股份",
-      "exchange": "深",
-      "color": "#b34a90",
-      "ranks": [
-        4,
-        6,
-        4,
-        6,
-        2,
-        2,
-        2,
-        2,
-        2
-      ],
-      "lastRank": 2,
-      "lastChangePct": 2.995486,
-      "bestRank": 2
     },
     {
       "ticker": "603366",
@@ -69,10 +51,32 @@
         4,
         4,
         4,
+        3,
+        2
+      ],
+      "lastRank": 2,
+      "lastChangePct": 10.03672,
+      "bestRank": 2
+    },
+    {
+      "ticker": "002242",
+      "name": "九阳股份",
+      "exchange": "深",
+      "color": "#b34a90",
+      "ranks": [
+        4,
+        6,
+        4,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
         3
       ],
       "lastRank": 3,
-      "lastChangePct": 10.03672,
+      "lastChangePct": 2.995486,
       "bestRank": 2
     },
     {
@@ -89,6 +93,7 @@
         3,
         3,
         3,
+        4,
         4
       ],
       "lastRank": 4,
@@ -105,6 +110,7 @@
         4,
         3,
         4,
+        5,
         5,
         5,
         5,
@@ -129,6 +135,7 @@
         6,
         6,
         6,
+        6,
         6
       ],
       "lastRank": 6,
@@ -149,6 +156,7 @@
         8,
         8,
         8,
+        7,
         7
       ],
       "lastRank": 7,
@@ -169,6 +177,7 @@
         7,
         7,
         7,
+        8,
         8
       ],
       "lastRank": 8,
@@ -185,6 +194,7 @@
         13,
         12,
         8,
+        9,
         9,
         9,
         9,
@@ -209,6 +219,7 @@
         10,
         10,
         10,
+        10,
         10
       ],
       "lastRank": 10,
@@ -223,6 +234,7 @@
       "ranks": [
         12,
         12,
+        11,
         11,
         11,
         11,
@@ -249,6 +261,7 @@
         12,
         12,
         12,
+        12,
         12
       ],
       "lastRank": 12,
@@ -266,6 +279,7 @@
         10,
         12,
         12,
+        13,
         13,
         13,
         13,
@@ -289,51 +303,12 @@
         14,
         14,
         14,
+        14,
         14
       ],
       "lastRank": 14,
       "lastChangePct": 15.263749,
       "bestRank": 13
-    },
-    {
-      "ticker": "002929",
-      "name": "润建股份",
-      "exchange": "深",
-      "color": "#0f6e56",
-      "ranks": [
-        23,
-        21,
-        21,
-        21,
-        22,
-        18,
-        18,
-        18,
-        15
-      ],
-      "lastRank": 15,
-      "lastChangePct": 10.005229,
-      "bestRank": 15
-    },
-    {
-      "ticker": "000525",
-      "name": "红太阳",
-      "exchange": "深",
-      "color": "#e24b4a",
-      "ranks": [
-        17,
-        14,
-        17,
-        18,
-        18,
-        17,
-        17,
-        17,
-        16
-      ],
-      "lastRank": 16,
-      "lastChangePct": 10.087719,
-      "bestRank": 14
     },
     {
       "ticker": "601188",
@@ -349,9 +324,10 @@
         16,
         16,
         16,
-        17
+        17,
+        15
       ],
-      "lastRank": 17,
+      "lastRank": 15,
       "lastChangePct": 10.115607,
       "bestRank": 14
     },
@@ -369,31 +345,54 @@
         15,
         15,
         15,
-        18
+        18,
+        16
       ],
-      "lastRank": 18,
+      "lastRank": 16,
       "lastChangePct": -3.761062,
       "bestRank": 13
     },
     {
-      "ticker": "300413",
-      "name": "芒果超媒",
+      "ticker": "002929",
+      "name": "润建股份",
       "exchange": "深",
-      "color": "#4a1b0c",
+      "color": "#0f6e56",
       "ranks": [
-        19,
-        19,
-        null,
-        25,
+        23,
         21,
-        19,
-        19,
-        19,
-        19
+        21,
+        21,
+        22,
+        18,
+        18,
+        18,
+        15,
+        17
       ],
-      "lastRank": 19,
-      "lastChangePct": 6.253813,
-      "bestRank": 19
+      "lastRank": 17,
+      "lastChangePct": 10.005229,
+      "bestRank": 15
+    },
+    {
+      "ticker": "000525",
+      "name": "红太阳",
+      "exchange": "深",
+      "color": "#e24b4a",
+      "ranks": [
+        17,
+        14,
+        17,
+        18,
+        18,
+        17,
+        17,
+        17,
+        16,
+        18
+      ],
+      "lastRank": 18,
+      "lastChangePct": 10.087719,
+      "bestRank": 14
     },
     {
       "ticker": "002889",
@@ -409,9 +408,10 @@
         20,
         20,
         20,
-        20
+        20,
+        19
       ],
-      "lastRank": 20,
+      "lastRank": 19,
       "lastChangePct": 10.0369,
       "bestRank": 16
     },
@@ -429,11 +429,33 @@
         21,
         21,
         21,
+        21,
+        20
+      ],
+      "lastRank": 20,
+      "lastChangePct": 6.876791,
+      "bestRank": 14
+    },
+    {
+      "ticker": "300413",
+      "name": "芒果超媒",
+      "exchange": "深",
+      "color": "#4a1b0c",
+      "ranks": [
+        19,
+        19,
+        null,
+        25,
+        21,
+        19,
+        19,
+        19,
+        19,
         21
       ],
       "lastRank": 21,
-      "lastChangePct": 6.876791,
-      "bestRank": 14
+      "lastChangePct": 6.253813,
+      "bestRank": 19
     },
     {
       "ticker": "600715",
@@ -446,6 +468,7 @@
         20,
         23,
         19,
+        22,
         22,
         22,
         22,
@@ -464,6 +487,7 @@
         27,
         25,
         22,
+        null,
         null,
         null,
         null,
@@ -489,31 +513,12 @@
         23,
         23,
         23,
+        23,
         23
       ],
       "lastRank": 23,
       "lastChangePct": 10.066007,
       "bestRank": 19
-    },
-    {
-      "ticker": "600371",
-      "name": "万向德农",
-      "exchange": "沪",
-      "color": "#7f77dd",
-      "ranks": [
-        22,
-        27,
-        25,
-        22,
-        30,
-        28,
-        28,
-        28,
-        24
-      ],
-      "lastRank": 24,
-      "lastChangePct": 10.035524,
-      "bestRank": 22
     },
     {
       "ticker": "002428",
@@ -525,6 +530,7 @@
         null,
         null,
         24,
+        null,
         null,
         null,
         null,
@@ -549,10 +555,32 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 24,
       "lastChangePct": 2.554745,
+      "bestRank": 24
+    },
+    {
+      "ticker": "001219",
+      "name": "青岛食品",
+      "exchange": "深",
+      "color": "#378add",
+      "ranks": [
+        null,
+        null,
+        26,
+        null,
+        27,
+        27,
+        27,
+        27,
+        26,
+        24
+      ],
+      "lastRank": 24,
+      "lastChangePct": -3.185536,
       "bestRank": 24
     },
     {
@@ -569,6 +597,7 @@
         26,
         26,
         26,
+        25,
         25
       ],
       "lastRank": 25,
@@ -576,23 +605,45 @@
       "bestRank": 23
     },
     {
-      "ticker": "001219",
-      "name": "青岛食品",
-      "exchange": "深",
-      "color": "#378add",
+      "ticker": "600371",
+      "name": "万向德农",
+      "exchange": "沪",
+      "color": "#7f77dd",
       "ranks": [
-        null,
-        null,
-        26,
-        null,
+        22,
         27,
-        27,
-        27,
-        27,
+        25,
+        22,
+        30,
+        28,
+        28,
+        28,
+        24,
         26
       ],
       "lastRank": 26,
-      "lastChangePct": -3.185536,
+      "lastChangePct": 10.035524,
+      "bestRank": 22
+    },
+    {
+      "ticker": "001258",
+      "name": "立新能源",
+      "exchange": "深",
+      "color": "#ba7517",
+      "ranks": [
+        null,
+        28,
+        29,
+        26,
+        null,
+        29,
+        29,
+        29,
+        29,
+        27
+      ],
+      "lastRank": 27,
+      "lastChangePct": 10,
       "bestRank": 26
     },
     {
@@ -609,9 +660,10 @@
         24,
         24,
         24,
-        27
+        27,
+        28
       ],
-      "lastRank": 27,
+      "lastRank": 28,
       "lastChangePct": 1.526718,
       "bestRank": 23
     },
@@ -625,6 +677,7 @@
         null,
         30,
         28,
+        null,
         null,
         null,
         null,
@@ -649,7 +702,8 @@
         25,
         25,
         25,
-        28
+        28,
+        null
       ],
       "lastRank": 28,
       "lastChangePct": 3.539095,
@@ -669,11 +723,33 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 28,
       "lastChangePct": -2.443992,
       "bestRank": 28
+    },
+    {
+      "ticker": "600825",
+      "name": "新华传媒",
+      "exchange": "沪",
+      "color": "#993556",
+      "ranks": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        29
+      ],
+      "lastRank": 29,
+      "lastChangePct": -1.070336,
+      "bestRank": 29
     },
     {
       "ticker": "600637",
@@ -689,31 +765,12 @@
         null,
         null,
         null,
-        null
+        null,
+        30
       ],
-      "lastRank": 29,
+      "lastRank": 30,
       "lastChangePct": 4.798962,
       "bestRank": 21
-    },
-    {
-      "ticker": "001258",
-      "name": "立新能源",
-      "exchange": "深",
-      "color": "#ba7517",
-      "ranks": [
-        null,
-        28,
-        29,
-        26,
-        null,
-        29,
-        29,
-        29,
-        29
-      ],
-      "lastRank": 29,
-      "lastChangePct": 10,
-      "bestRank": 26
     },
     {
       "ticker": "300502",
@@ -729,7 +786,8 @@
         null,
         null,
         null,
-        30
+        30,
+        null
       ],
       "lastRank": 30,
       "lastChangePct": -7.278703,
@@ -749,6 +807,7 @@
         30,
         30,
         30,
+        null,
         null
       ],
       "lastRank": 30,
