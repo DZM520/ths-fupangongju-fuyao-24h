@@ -52,15 +52,20 @@
   .flat { color: var(--muted); }
   .footer { margin-top: 18px; text-align: center; color: var(--muted); font-size: 12px; }
   .empty { padding: 48px 0; text-align: center; color: var(--muted); }
-  .times { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; }
-  .times::-webkit-scrollbar { height: 6px; }
-  .times::-webkit-scrollbar-thumb { background: #d8d8d3; border-radius: 3px; }
-  .times button {
-    flex: 0 0 auto; border: 1px solid var(--border); background: var(--card);
-    color: var(--muted); padding: 4px 10px; border-radius: 7px;
-    font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap;
+  .snap-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .snap-bar select {
+    flex: 1 1 190px; min-width: 0; max-width: 100%;
+    padding: 6px 8px; border: 1px solid var(--border); border-radius: 7px;
+    background: var(--card); color: var(--text);
+    font-size: 12px; font-family: inherit; cursor: pointer;
   }
-  .times button.on { background: #185fa5; border-color: #185fa5; color: #fff; }
+  .snap-bar .mini {
+    flex: 0 0 auto; border: 1px solid var(--border); background: var(--card);
+    color: var(--muted); padding: 6px 10px; border-radius: 7px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  .snap-bar .mini:hover { border-color: #185fa5; color: #185fa5; }
+  .snap-info { font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .tablewrap { max-height: 520px; overflow: auto; border-top: 1px solid var(--border); }
 
   /* 表格基础样式 */
@@ -128,8 +133,12 @@
 
     <div class="card panel-snap" id="snapCard" hidden>
       <h2>榜单明细</h2>
-      <div class="legend-hint">点选时刻，查看当时完整的 100 只热榜股票</div>
-      <div class="times" id="snapTimes"></div>
+      <div class="legend-hint">选择任意历史时刻（按日期分组），查看当时完整的 100 只热榜股票</div>
+      <div class="snap-bar">
+        <select id="snapSelect" aria-label="选择抓取时刻"></select>
+        <button class="mini" id="snapLatest" type="button">回到最新</button>
+        <span class="snap-info" id="snapInfo"></span>
+      </div>
       <div class="tablewrap">
         <table>
           <thead>
@@ -144,7 +153,7 @@
     </div>
   </div>
 
-  <div class="footer">数据来源：同花顺热榜 · docs/bump.json · docs/snapshots.json · 每只股票颜色固定不变</div>
+  <div class="footer">数据来源：同花顺热榜 · docs/bump.json · docs/times.json + docs/records/ · 每只股票颜色固定不变</div>
 </div>
 
 <script>
@@ -349,30 +358,75 @@ document.getElementById('seg').addEventListener('click', (ev) => {
   if (raw) render();
 });
 
-/* ---------------- 榜单明细（在线查看） ---------------- */
+/* ---------------- 榜单明细（全量历史 · 按需加载） ---------------- */
 function fmtHeat(v) {
   if (v == null || !Number.isFinite(v)) return '-';
   return v >= 10000 ? (v / 10000).toFixed(1) + '万' : String(Math.round(v));
 }
+const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+function fullTime(t) {
+  const m = String(t || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+  return m ? m[1] + ' ' + m[2] : String(t || '');
+}
 
-let snaps = null;
-let snapIdx = -1;
+let feed = null;          // docs/times.json：全量时刻索引
+let curSnap = null;       // 当前选中时刻的完整榜单
+let curId = '';
+const recCache = new Map();
 
-function renderSnapTimes() {
-  const box = document.getElementById('snapTimes');
-  box.innerHTML = snaps.snapshots.map((s, i) => {
-    const t = shortTime(s.time);
-    return '<button data-i="' + i + '"' + (i === snapIdx ? ' class="on"' : '') + '>' + t + '</button>';
-  }).join('');
-  const on = box.querySelector('button.on');
-  if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+function buildSnapOptions() {
+  const sel = document.getElementById('snapSelect');
+  // 按日期分组，日期与时刻都写全，不再只显示 HH:mm
+  const groups = new Map();
+  for (const t of feed.times) {
+    const ft = fullTime(t.time);
+    const date = ft.slice(0, 10);
+    if (!groups.has(date)) groups.set(date, []);
+    groups.get(date).push({ id: t.id, time: ft, count: t.count });
+  }
+  let html = '';
+  for (const [date, list] of groups) {           // feed.times 最新在前
+    const d = new Date(date + 'T00:00:00+08:00');
+    const w = Number.isNaN(d.getTime()) ? '' : ' ' + WEEK[d.getDay()];
+    html += '<optgroup label="' + date + w + '（' + list.length + ' 次）">';
+    for (const it of list) {
+      html += '<option value="' + it.id + '">' + it.time + ' · ' + it.count + ' 只</option>';
+    }
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+  if (curId) sel.value = curId;
+}
+
+async function fetchRecord(id) {
+  if (recCache.has(id)) return recCache.get(id);
+  const r = await fetch('./records/' + encodeURIComponent(id) + '.json', { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  recCache.set(id, d);
+  return d;
+}
+
+async function selectSnap(id) {
+  if (!id) return;
+  curId = id;
+  const sel = document.getElementById('snapSelect');
+  if (sel.value !== id) sel.value = id;
+  const info = document.getElementById('snapInfo');
+  info.textContent = '加载中…';
+  try {
+    curSnap = await fetchRecord(id);
+    renderSnapTable();
+    info.textContent = fullTime(curSnap.time) + ' · 共 ' + curSnap.rows.length + ' 只';
+  } catch (e) {
+    info.textContent = '加载失败：' + e.message;
+  }
 }
 
 function renderSnapTable() {
-  const s = snaps.snapshots[snapIdx];
-  if (!s) return;
+  if (!curSnap) return;
   const tbody = document.getElementById('snapBody');
-  tbody.innerHTML = s.rows.map((r) => {
+  tbody.innerHTML = curSnap.rows.map((r) => {
     const rank = r[0], code = r[1], name = r[2], price = r[3], chg = r[4], heat = r[5], ex = r[6];
     const p = fmtPct(chg);
     return '<tr>' +
@@ -385,29 +439,26 @@ function renderSnapTable() {
       '<td>' + (ex || '') + '</td>' +
       '</tr>';
   }).join('');
+  document.querySelector('#snapCard .tablewrap').scrollTop = 0;
 }
 
-async function loadSnaps() {
+async function loadFeed() {
   try {
-    const r = await fetch('./snapshots.json', { cache: 'no-store' });
+    const r = await fetch('./times.json', { cache: 'no-store' });
     if (!r.ok) return;
-    snaps = await r.json();
-    if (!snaps.snapshots || !snaps.snapshots.length) return;
-    snapIdx = snaps.snapshots.length - 1;
+    feed = await r.json();
+    if (!feed.times || !feed.times.length) return;
     document.getElementById('snapCard').hidden = false;
-    renderSnapTimes();
-    renderSnapTable();
+    buildSnapOptions();
+    await selectSnap(feed.times[0].id);
   } catch (e) {
-    console.warn('snapshots 加载失败:', e);
+    console.warn('times.json 加载失败:', e);
   }
 }
 
-document.getElementById('snapTimes').addEventListener('click', (ev) => {
-  const btn = ev.target.closest('button');
-  if (!btn) return;
-  snapIdx = parseInt(btn.dataset.i, 10);
-  renderSnapTimes();
-  renderSnapTable();
+document.getElementById('snapSelect').addEventListener('change', (ev) => selectSnap(ev.target.value));
+document.getElementById('snapLatest').addEventListener('click', () => {
+  if (feed && feed.times.length) selectSnap(feed.times[0].id);
 });
 
 /* ---------------- 视图切换：并列 / 仅走势图 / 仅明细 ---------------- */
@@ -430,7 +481,7 @@ document.getElementById('viewSeg').addEventListener('click', (ev) => {
 });
 
 load();
-loadSnaps();
+loadFeed();
 </script>
 </body>
 </html>

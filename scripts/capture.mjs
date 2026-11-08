@@ -350,42 +350,72 @@ function writeBump() {
 }
 
 /* ---------------- 各时刻完整榜单快照（看板在线查看用） ---------------- */
-export function writeSnapshots(maxTimes = 24) {
-  const ids = pickHourlyIds(listRecordIds());
-  const picked = ids.slice(-maxTimes);
+/* ---------------- 榜单明细：全量时刻索引 + 按需加载的单条快照 ---------------- */
+/* 不再把所有时刻塞进一个大 JSON（会随历史线性膨胀），改为：
+   docs/times.json            全量时刻列表（最新在前，含完整日期）
+   docs/records/<id>.json     单个时刻的 100 只股票，页面点选时才请求
+   每次抓取只新增/更新一个文件，历史全部可选。                          */
+export function writeRecordFeed() {
+  const ids = listRecordIds(); // 全量历史，不截断
+  const root = path.resolve(recordsDir(), '..', '..');
+  const outDir = path.join(root, 'docs', 'records');
+  fs.mkdirSync(outDir, { recursive: true });
 
-  // 用数组代替对象压缩体积：每行 [排名, 代码, 名称, 现价, 涨幅, 热度, 市场]
-  const snapshots = [];
-  for (const id of picked) {
+  const num2 = (v) => (v != null && Number.isFinite(v) ? Math.round(v * 100) / 100 : null);
+  const times = [];
+
+  for (const id of ids) {
     const rec = readJson(path.join(recordsDir(), `${id}.json`));
     if (!rec || !Array.isArray(rec.rows)) continue;
-    snapshots.push({
-      time: rec.capturedAt || '',
-      rows: rec.rows.map((s) => [
-        s.rank,
-        s.ticker || '',
-        s.name || '',
-        s.price != null && Number.isFinite(s.price) ? Math.round(s.price * 100) / 100 : null,
-        s.changePct != null && Number.isFinite(s.changePct) ? Math.round(s.changePct * 100) / 100 : null,
-        s.heat != null && Number.isFinite(s.heat) ? Math.round(s.heat) : null,
-        s.exchange || '',
-      ]),
+    const m = id.match(/^(\d{4}-\d{2}-\d{2})_(\d{2})-(\d{2})$/);
+    const time = rec.capturedAt || (m ? `${m[1]} ${m[2]}:${m[3]}` : id);
+
+    // 数组代替对象压缩体积：[排名, 代码, 名称, 现价, 涨幅, 热度, 市场]
+    const rows = rec.rows.map((s) => [
+      s.rank,
+      s.ticker || '',
+      s.name || '',
+      num2(s.price),
+      num2(s.changePct),
+      s.heat != null && Number.isFinite(s.heat) ? Math.round(s.heat) : null,
+      s.exchange || '',
+    ]);
+
+    const json = JSON.stringify({
+      id, time,
+      fields: ['rank', 'code', 'name', 'price', 'chg', 'heat', 'ex'],
+      rows,
     });
+    // 内容没变就不重写，避免每小时把全量历史文件全部改动一遍
+    const target = path.join(outDir, `${id}.json`);
+    let changed = true;
+    try { changed = fs.readFileSync(target, 'utf8') !== json; } catch { /* 文件不存在 */ }
+    if (changed) fs.writeFileSync(target, json, 'utf8');
+
+    times.push({ id, time, count: rows.length });
   }
 
-  const data = {
-    updatedAt: new Date().toISOString(),
-    fields: ['rank', 'code', 'name', 'price', 'chg', 'heat', 'ex'],
-    total: snapshots.length,
-    snapshots,
-  };
-  // 快照体积较大，用紧凑 JSON（不格式化）写入
-  const json = JSON.stringify(data);
-  fs.writeFileSync(path.join(recordsDir(), '..', 'snapshots.json'), json, 'utf8');
-  const root = path.resolve(recordsDir(), '..', '..');
-  fs.writeFileSync(path.join(root, 'docs', 'snapshots.json'), json, 'utf8');
-  console.log(`[ok] 生成榜单快照 docs/snapshots.json（${snapshots.length} 个时刻 / ${(json.length / 1024).toFixed(0)} KB）`);
-  return data;
+  times.reverse(); // 最新在前
+  const index = { updatedAt: new Date().toISOString(), total: times.length, times };
+  const idxJson = JSON.stringify(index);
+  fs.writeFileSync(path.join(root, 'docs', 'times.json'), idxJson, 'utf8');
+  fs.writeFileSync(path.join(recordsDir(), '..', 'times.json'), idxJson, 'utf8');
+
+  // 已被 pruneOld 清理的记录，同步删掉对应的快照文件
+  const keep = new Set(ids.map((id) => `${id}.json`));
+  for (const f of fs.readdirSync(outDir)) {
+    if (f.endsWith('.json') && !keep.has(f)) {
+      try { fs.unlinkSync(path.join(outDir, f)); } catch { /* ignore */ }
+    }
+  }
+
+  // 迁移：移除旧版聚合快照（已被上面的拆分格式取代）
+  for (const f of [path.join(recordsDir(), '..', 'snapshots.json'), path.join(root, 'docs', 'snapshots.json')]) {
+    try { fs.unlinkSync(f); } catch { /* 已删除 */ }
+  }
+
+  console.log(`[ok] 生成榜单明细 docs/times.json（${times.length} 个时刻 / 全量历史）`);
+  return index;
 }
 
 /* ---------------- 主流程（修复了索引与清理的顺序） ---------------- */
@@ -410,8 +440,8 @@ if (isMain) {
       // 再生成排名时序数据
       writeBump();
 
-      // 再生成各时刻榜单快照（看板在线查看）
-      writeSnapshots();
+      // 再生成榜单明细索引 + 全量单条快照（看板在线查看）
+      writeRecordFeed();
 
       // 最后生成 Excel
       if (!r.dryRun) writeDayWorkbook(t.date);
