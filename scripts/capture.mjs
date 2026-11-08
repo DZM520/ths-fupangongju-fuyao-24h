@@ -119,14 +119,22 @@ function parseRecordId(id) {
   return Number.isFinite(t) ? t : NaN;
 }
 
-/* ---------------- 抓取（时间间隔去重逻辑） ---------------- */
+/* 同一小时只保留最后一条：id 形如 2026-11-08_17-46，前 13 位就是小时 */
+function hourKeyOf(id) { return id.slice(0, 13); }
+function pickHourlyIds(ids) {
+  const m = new Map();
+  for (const id of ids) m.set(hourKeyOf(id), id); // ids 升序，同小时后出现的覆盖前面
+  return [...m.values()].sort();
+}
+
+/* ---------------- 抓取（按小时去重，每小时只落一条） ---------------- */
 async function capture() {
   if (!API_KEY) throw new Error('缺少环境变量 FUYAO_API_KEY（仓库 Settings → Secrets → Actions）');
 
   const t = nowParts();
   const id = `${t.date}_${pad(t.hour)}-${pad(t.minute)}`;
+  const hourKey = `${t.date}_${pad(t.hour)}`;
 
-  // 【核心修改点】获取本地已有的记录列表，通过时间差判断
   const existingIds = listRecordIds();
 
   if (existingIds.length > 0) {
@@ -134,13 +142,20 @@ async function capture() {
     const lastTime = parseRecordId(lastId);
     const gapMinutes = (Date.now() - lastTime) / 60000;
 
-    // 如果距离上次抓取不到 45 分钟，说明大概率是重复触发了，跳过
-    if (Number.isFinite(gapMinutes) && gapMinutes < 45) {
-      console.log(`[skip] 距离上次抓取 (${lastId}) 仅过去 ${gapMinutes.toFixed(0)} 分钟，跳过本次抓取`);
+    // 主判断：本小时已经抓过 → 跳过。外部定时器每 15 分钟来一次也不怕，
+    // 每个自然小时只会写入一条，时间点固定在该小时第一次触发附近。
+    if (hourKeyOf(lastId) === hourKey) {
+      console.log(`[skip] ${hourKey} 时已有记录 ${lastId}，本次跳过（每小时仅保留一条）`);
       return { skipped: true };
     }
 
-    // 如果距离上次抓取超过了 90 分钟，说明 GitHub 调度器吞了事件，记录警告
+    // 兜底：上次抓取若因延迟落在小时末尾，避免下一小时刚开始就又抓一条
+    if (Number.isFinite(gapMinutes) && gapMinutes < 20) {
+      console.log(`[skip] 距上次抓取 (${lastId}) 仅 ${gapMinutes.toFixed(0)} 分钟，跳过本次抓取`);
+      return { skipped: true };
+    }
+
+    // 超过 90 分钟没有数据，说明定时任务可能被吞了
     if (Number.isFinite(gapMinutes) && gapMinutes > 90) {
       console.warn(`[warn] ⚠️ 数据断层！上一次抓取是 ${lastId}，距今已过去 ${gapMinutes.toFixed(0)} 分钟。`);
     }
@@ -250,7 +265,8 @@ function hashIndex(s) {
 const stockKey = (s) => s.ticker || s.thscode || s.name;
 
 export function buildRankTimeline(topN = 30, windowHours = 24) {
-  const ids = listRecordIds();
+  // 历史密集记录（早期 15 分钟轮询 / 旧 bug 重复触发）按小时合并，看板每小时一个点
+  const ids = pickHourlyIds(listRecordIds());
   const now = Date.now();
   const windowMs = windowHours * 3600 * 1000;
 
@@ -335,7 +351,7 @@ function writeBump() {
 
 /* ---------------- 各时刻完整榜单快照（看板在线查看用） ---------------- */
 export function writeSnapshots(maxTimes = 24) {
-  const ids = listRecordIds();
+  const ids = pickHourlyIds(listRecordIds());
   const picked = ids.slice(-maxTimes);
 
   // 用数组代替对象压缩体积：每行 [排名, 代码, 名称, 现价, 涨幅, 热度, 市场]
