@@ -1,0 +1,539 @@
+{
+  "updatedAt": "2026-11-08T04:53:59.465Z",
+  "windowHours": 24,
+  "topN": 30,
+  "times": [
+    "2026-11-07 16:32",
+    "2026-11-07 23:32",
+    "2026-11-08 04:01",
+    "2026-11-08 07:33"
+  ],
+  "total": 35,
+  "stocks": [
+    {
+      "ticker": "002086",
+      "name": "东方海洋",
+      "exchange": "深",
+      "color": "#ba7517",
+      "ranks": [
+        1,
+        2,
+        1,
+        1
+      ],
+      "lastRank": 1,
+      "lastChangePct": 9.972299,
+      "bestRank": 1
+    },
+    {
+      "ticker": "688825",
+      "name": "长鑫科技",
+      "exchange": "沪",
+      "color": "#0c447c",
+      "ranks": [
+        null,
+        1,
+        6,
+        2
+      ],
+      "lastRank": 2,
+      "lastChangePct": -4.984717,
+      "bestRank": 1
+    },
+    {
+      "ticker": "603366",
+      "name": "日出东方",
+      "exchange": "沪",
+      "color": "#3c3489",
+      "ranks": [
+        3,
+        3,
+        2,
+        3
+      ],
+      "lastRank": 3,
+      "lastChangePct": 10.03672,
+      "bestRank": 2
+    },
+    {
+      "ticker": "600261",
+      "name": "阳光照明",
+      "exchange": "沪",
+      "color": "#d4537e",
+      "ranks": [
+        5,
+        4,
+        3,
+        4
+      ],
+      "lastRank": 4,
+      "lastChangePct": 9.979633,
+      "bestRank": 3
+    },
+    {
+      "ticker": "002310",
+      "name": "东方新能",
+      "exchange": "深",
+      "color": "#e2579f",
+      "ranks": [
+        8,
+        7,
+        7,
+        5
+      ],
+      "lastRank": 5,
+      "lastChangePct": 9.952607,
+      "bestRank": 5
+    },
+    {
+      "ticker": "002242",
+      "name": "九阳股份",
+      "exchange": "深",
+      "color": "#b34a90",
+      "ranks": [
+        4,
+        6,
+        4,
+        6
+      ],
+      "lastRank": 6,
+      "lastChangePct": 2.995486,
+      "bestRank": 4
+    },
+    {
+      "ticker": "002384",
+      "name": "东山精密",
+      "exchange": "深",
+      "color": "#7f77dd",
+      "ranks": [
+        2,
+        5,
+        5,
+        7
+      ],
+      "lastRank": 7,
+      "lastChangePct": -10,
+      "bestRank": 2
+    },
+    {
+      "ticker": "600327",
+      "name": "大东方",
+      "exchange": "沪",
+      "color": "#639922",
+      "ranks": [
+        11,
+        13,
+        12,
+        8
+      ],
+      "lastRank": 8,
+      "lastChangePct": 10.089686,
+      "bestRank": 8
+    },
+    {
+      "ticker": "601599",
+      "name": "浙文影业",
+      "exchange": "沪",
+      "color": "#5dcaa5",
+      "ranks": [
+        6,
+        8,
+        9,
+        9
+      ],
+      "lastRank": 9,
+      "lastChangePct": 9.95671,
+      "bestRank": 6
+    },
+    {
+      "ticker": "000678",
+      "name": "襄阳轴承",
+      "exchange": "深",
+      "color": "#993556",
+      "ranks": [
+        9,
+        9,
+        8,
+        10
+      ],
+      "lastRank": 10,
+      "lastChangePct": -9.979737,
+      "bestRank": 8
+    },
+    {
+      "ticker": "002578",
+      "name": "闽发铝业",
+      "exchange": "深",
+      "color": "#0f6e56",
+      "ranks": [
+        12,
+        12,
+        11,
+        11
+      ],
+      "lastRank": 11,
+      "lastChangePct": 10.10989,
+      "bestRank": 11
+    },
+    {
+      "ticker": "002088",
+      "name": "鲁阳节能",
+      "exchange": "深",
+      "color": "#639922",
+      "ranks": [
+        7,
+        10,
+        10,
+        12
+      ],
+      "lastRank": 12,
+      "lastChangePct": 10.019841,
+      "bestRank": 7
+    },
+    {
+      "ticker": "300308",
+      "name": "中际旭创",
+      "exchange": "深",
+      "color": "#1d9e75",
+      "ranks": [
+        10,
+        11,
+        15,
+        13
+      ],
+      "lastRank": 13,
+      "lastChangePct": -9.188576,
+      "bestRank": 10
+    },
+    {
+      "ticker": "300118",
+      "name": "东方日升",
+      "exchange": "深",
+      "color": "#378add",
+      "ranks": [
+        13,
+        15,
+        19,
+        14
+      ],
+      "lastRank": 14,
+      "lastChangePct": 15.263749,
+      "bestRank": 13
+    },
+    {
+      "ticker": "601188",
+      "name": "龙江交通",
+      "exchange": "沪",
+      "color": "#3c3489",
+      "ranks": [
+        18,
+        17,
+        14,
+        15
+      ],
+      "lastRank": 15,
+      "lastChangePct": 10.115607,
+      "bestRank": 14
+    },
+    {
+      "ticker": "600127",
+      "name": "金健米业",
+      "exchange": "沪",
+      "color": "#ba7517",
+      "ranks": [
+        14,
+        20,
+        16,
+        16
+      ],
+      "lastRank": 16,
+      "lastChangePct": 6.876791,
+      "bestRank": 14
+    },
+    {
+      "ticker": "000530",
+      "name": "冰山冷热",
+      "exchange": "深",
+      "color": "#712b13",
+      "ranks": [
+        15,
+        16,
+        13,
+        17
+      ],
+      "lastRank": 17,
+      "lastChangePct": -3.761062,
+      "bestRank": 13
+    },
+    {
+      "ticker": "000525",
+      "name": "红太阳",
+      "exchange": "深",
+      "color": "#e24b4a",
+      "ranks": [
+        17,
+        14,
+        17,
+        18
+      ],
+      "lastRank": 18,
+      "lastChangePct": 10.087719,
+      "bestRank": 14
+    },
+    {
+      "ticker": "002388",
+      "name": "新亚制程",
+      "exchange": "深",
+      "color": "#993556",
+      "ranks": [
+        26,
+        22,
+        24,
+        19
+      ],
+      "lastRank": 19,
+      "lastChangePct": 10.066007,
+      "bestRank": 19
+    },
+    {
+      "ticker": "002889",
+      "name": "东方嘉盛",
+      "exchange": "深",
+      "color": "#85b7eb",
+      "ranks": [
+        16,
+        18,
+        18,
+        20
+      ],
+      "lastRank": 20,
+      "lastChangePct": 10.0369,
+      "bestRank": 16
+    },
+    {
+      "ticker": "002929",
+      "name": "润建股份",
+      "exchange": "深",
+      "color": "#0f6e56",
+      "ranks": [
+        23,
+        21,
+        21,
+        21
+      ],
+      "lastRank": 21,
+      "lastChangePct": 10.005229,
+      "bestRank": 21
+    },
+    {
+      "ticker": "600371",
+      "name": "万向德农",
+      "exchange": "沪",
+      "color": "#7f77dd",
+      "ranks": [
+        22,
+        27,
+        25,
+        22
+      ],
+      "lastRank": 22,
+      "lastChangePct": 10.035524,
+      "bestRank": 22
+    },
+    {
+      "ticker": "603278",
+      "name": "大业股份",
+      "exchange": "沪",
+      "color": "#ed93b1",
+      "ranks": [
+        27,
+        25,
+        22,
+        null
+      ],
+      "lastRank": 22,
+      "lastChangePct": -10.013263,
+      "bestRank": 22
+    },
+    {
+      "ticker": "600715",
+      "name": "文投控股",
+      "exchange": "沪",
+      "color": "#d85a30",
+      "ranks": [
+        20,
+        26,
+        20,
+        23
+      ],
+      "lastRank": 23,
+      "lastChangePct": -6.746032,
+      "bestRank": 20
+    },
+    {
+      "ticker": "300502",
+      "name": "新易盛",
+      "exchange": "深",
+      "color": "#b34a90",
+      "ranks": [
+        24,
+        null,
+        null,
+        null
+      ],
+      "lastRank": 24,
+      "lastChangePct": -7.278703,
+      "bestRank": 24
+    },
+    {
+      "ticker": "002428",
+      "name": "云南锗业",
+      "exchange": "深",
+      "color": "#ba7517",
+      "ranks": [
+        28,
+        null,
+        null,
+        24
+      ],
+      "lastRank": 24,
+      "lastChangePct": -8.316456,
+      "bestRank": 24
+    },
+    {
+      "ticker": "600177",
+      "name": "雅戈尔",
+      "exchange": "沪",
+      "color": "#993556",
+      "ranks": [
+        null,
+        24,
+        null,
+        null
+      ],
+      "lastRank": 24,
+      "lastChangePct": 2.554745,
+      "bestRank": 24
+    },
+    {
+      "ticker": "300413",
+      "name": "芒果超媒",
+      "exchange": "深",
+      "color": "#4a1b0c",
+      "ranks": [
+        19,
+        19,
+        null,
+        25
+      ],
+      "lastRank": 25,
+      "lastChangePct": 6.253813,
+      "bestRank": 19
+    },
+    {
+      "ticker": "001258",
+      "name": "立新能源",
+      "exchange": "深",
+      "color": "#ba7517",
+      "ranks": [
+        null,
+        28,
+        29,
+        26
+      ],
+      "lastRank": 26,
+      "lastChangePct": 10,
+      "bestRank": 26
+    },
+    {
+      "ticker": "001219",
+      "name": "青岛食品",
+      "exchange": "深",
+      "color": "#378add",
+      "ranks": [
+        null,
+        null,
+        26,
+        null
+      ],
+      "lastRank": 26,
+      "lastChangePct": -3.185536,
+      "bestRank": 26
+    },
+    {
+      "ticker": "002724",
+      "name": "海洋王",
+      "exchange": "深",
+      "color": "#d4537e",
+      "ranks": [
+        25,
+        29,
+        23,
+        27
+      ],
+      "lastRank": 27,
+      "lastChangePct": 1.526718,
+      "bestRank": 23
+    },
+    {
+      "ticker": "002696",
+      "name": "百洋股份",
+      "exchange": "深",
+      "color": "#854f0b",
+      "ranks": [
+        30,
+        null,
+        28,
+        null
+      ],
+      "lastRank": 28,
+      "lastChangePct": 1.189387,
+      "bestRank": 28
+    },
+    {
+      "ticker": "600278",
+      "name": "东方创业",
+      "exchange": "沪",
+      "color": "#854f0b",
+      "ranks": [
+        null,
+        null,
+        30,
+        28
+      ],
+      "lastRank": 28,
+      "lastChangePct": 10.046368,
+      "bestRank": 28
+    },
+    {
+      "ticker": "603381",
+      "name": "永臻股份",
+      "exchange": "沪",
+      "color": "#993556",
+      "ranks": [
+        29,
+        23,
+        27,
+        29
+      ],
+      "lastRank": 29,
+      "lastChangePct": 10.026525,
+      "bestRank": 23
+    },
+    {
+      "ticker": "600637",
+      "name": "东方明珠",
+      "exchange": "沪",
+      "color": "#0f6e56",
+      "ranks": [
+        21,
+        30,
+        null,
+        30
+      ],
+      "lastRank": 30,
+      "lastChangePct": 4.798962,
+      "bestRank": 21
+    }
+  ]
+}

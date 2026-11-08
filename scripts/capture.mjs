@@ -10,6 +10,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { buildWorkbook } from './lib/xlsx.mjs';
 import {
   ensureDirs,
@@ -69,12 +70,12 @@ async function apiGet(pathname, params, retries = 3) {
         signal: AbortSignal.timeout(25000),
       });
       const text = await resp.text();
-      
+
       // 鉴权或限流错误直接抛出，不重试
       if (resp.status === 401 || resp.status === 403) throw new Error(`HTTP ${resp.status} Key 无效或无权限: ${text.slice(0, 120)}`);
       if (resp.status === 429) throw new Error('HTTP 429 调用频率超限');
       if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 160)}`);
-      
+
       let json;
       try {
         json = JSON.parse(text);
@@ -110,31 +111,37 @@ function normalizeStock(it, i) {
   };
 }
 
+/* 把 "YYYY-MM-DD_HH-mm" 解析为东八区时间戳（毫秒），失败返回 NaN */
+function parseRecordId(id) {
+  const m = id && id.match(/^(\d{4}-\d{2}-\d{2})_(\d{2})-(\d{2})$/);
+  if (!m) return NaN;
+  const t = new Date(`${m[1]}T${m[2]}:${m[3]}:00+08:00`).getTime();
+  return Number.isFinite(t) ? t : NaN;
+}
+
 /* ---------------- 抓取（时间间隔去重逻辑） ---------------- */
 async function capture() {
   if (!API_KEY) throw new Error('缺少环境变量 FUYAO_API_KEY（仓库 Settings → Secrets → Actions）');
 
   const t = nowParts();
   const id = `${t.date}_${pad(t.hour)}-${pad(t.minute)}`;
-  
+
   // 【核心修改点】获取本地已有的记录列表，通过时间差判断
   const existingIds = listRecordIds();
-  
+
   if (existingIds.length > 0) {
     const lastId = existingIds[existingIds.length - 1];
-    // 将 "YYYY-MM-DD_HH-mm" 转为时间戳（东八区）
-    const lastTime = new Date(lastId.replace('_', 'T') + ':00+08:00').getTime();
-    const now = new Date().getTime();
-    const gapMinutes = (now - lastTime) / (1000 * 60);
+    const lastTime = parseRecordId(lastId);
+    const gapMinutes = (Date.now() - lastTime) / 60000;
 
     // 如果距离上次抓取不到 45 分钟，说明大概率是重复触发了，跳过
-    if (gapMinutes < 45) {
+    if (Number.isFinite(gapMinutes) && gapMinutes < 45) {
       console.log(`[skip] 距离上次抓取 (${lastId}) 仅过去 ${gapMinutes.toFixed(0)} 分钟，跳过本次抓取`);
       return { skipped: true };
     }
 
     // 如果距离上次抓取超过了 90 分钟，说明 GitHub 调度器吞了事件，记录警告
-    if (gapMinutes > 90) {
+    if (Number.isFinite(gapMinutes) && gapMinutes > 90) {
       console.warn(`[warn] ⚠️ 数据断层！上一次抓取是 ${lastId}，距今已过去 ${gapMinutes.toFixed(0)} 分钟。`);
     }
   }
@@ -223,26 +230,136 @@ function writeDayWorkbook(date) {
   return file;
 }
 
-/* ---------------- 主流程（修复了索引与清理的顺序） ---------------- */
-try {
-  const r = await capture();
-  if (!DRY_RUN && !r.skipped) {
-    const t = nowParts();
-    // 先清理旧数据
-    const removed = pruneOld(KEEP_DAYS);
-    if (removed) console.log(`[ok] 清理 ${removed} 条超过 ${KEEP_DAYS} 天的记录`);
-    
-    const removedXlsx = pruneOldExports(KEEP_DAYS);
-    if (removedXlsx) console.log(`[ok] 清理 ${removedXlsx} 个过期 Excel`);
-    
-    // 再重建索引
-    const items = rebuildIndex();
-    console.log(`[ok] 索引已更新：共 ${items.length} 条记录`);
-    
-    // 最后生成 Excel
-    if (!r.dryRun) writeDayWorkbook(t.date);
+/* ---------------- 排名时序数据（Bump Chart 排位赛图用） ---------------- */
+
+// 高区分度调色板（按 ticker 哈希稳定取色，保证刷新时颜色不漂移）
+const PALETTE = [
+  '#e24b4a', '#378add', '#1d9e75', '#d4537e', '#ba7517', '#7f77dd',
+  '#639922', '#d85a30', '#185fa5', '#993556', '#0f6e56', '#854f0b',
+  '#3c3489', '#5f5e5a', '#ed93b1', '#85b7eb', '#97c459', '#f09595',
+  '#5dcaa5', '#888780', '#ef9f27', '#a32d2d', '#534ab7', '#3b6d11',
+  '#e2579f', '#0c447c', '#712b13', '#26215c', '#b34a90', '#4a1b0c',
+];
+
+function hashIndex(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+const stockKey = (s) => s.ticker || s.thscode || s.name;
+
+export function buildRankTimeline(topN = 30, windowHours = 24) {
+  const ids = listRecordIds();
+  const now = Date.now();
+  const windowMs = windowHours * 3600 * 1000;
+
+  const records = [];
+  for (const id of ids) {
+    const t = parseRecordId(id);
+    if (!Number.isFinite(t) || now - t > windowMs) continue;
+    const rec = readJson(path.join(recordsDir(), `${id}.json`));
+    if (!rec || !Array.isArray(rec.rows)) continue;
+    records.push({ t, rec });
   }
-} catch (e) {
-  console.error('[fail]', e.message);
-  process.exit(1);
+  records.sort((a, b) => a.t - b.t);
+  const times = records.map((r) => r.rec.capturedAt || '');
+
+  // 候选：近窗口内任一时刻进入过前 topN 的股票
+  const cand = new Map();
+  for (const { rec } of records) {
+    for (const s of rec.rows) {
+      if (s.rank != null && s.rank <= topN) {
+        const key = stockKey(s);
+        if (key && !cand.has(key)) {
+          cand.set(key, { ticker: s.ticker || '', name: s.name || '', exchange: s.exchange || '' });
+        }
+      }
+    }
+  }
+
+  const stocks = [];
+  for (const [key, info] of cand) {
+    const ranks = records.map(({ rec }) => {
+      const s = rec.rows.find((x) => stockKey(x) === key);
+      return s && s.rank != null && s.rank <= topN ? s.rank : null;
+    });
+
+    let lastRank = null;
+    let lastChangePct = null;
+    for (let i = ranks.length - 1; i >= 0; i--) {
+      if (ranks[i] != null) {
+        lastRank = ranks[i];
+        const s = records[i].rec.rows.find((x) => stockKey(x) === key);
+        lastChangePct = s && s.changePct != null && Number.isFinite(s.changePct) ? s.changePct : null;
+        break;
+      }
+    }
+
+    let bestRank = 9999;
+    for (const r of ranks) if (r != null && r < bestRank) bestRank = r;
+
+    stocks.push({ ...info, color: PALETTE[hashIndex(key) % PALETTE.length], ranks, lastRank, lastChangePct, bestRank });
+  }
+
+  // 排序：当前在榜的按最新排名升序在前；已跌出的按历史最佳排名接在后面
+  stocks.sort((a, b) => {
+    const la = a.lastRank == null ? 100000 + a.bestRank : a.lastRank;
+    const lb = b.lastRank == null ? 100000 + b.bestRank : b.lastRank;
+    return la - lb;
+  });
+
+  return {
+    updatedAt: new Date().toISOString(),
+    windowHours,
+    topN,
+    times,
+    total: stocks.length,
+    stocks,
+  };
+}
+
+function writeBump() {
+  const data = buildRankTimeline(30, 24);
+  const file = path.join(recordsDir(), '..', 'bump.json');
+  writeJson(file, data);
+  console.log(`[ok] 生成排名时序 data/bump.json（${data.total} 只 / ${data.times.length} 个时刻）`);
+
+  // 同步一份到 docs/，供 GitHub Pages 可视化看板读取
+  const root = path.resolve(recordsDir(), '..', '..');
+  const docFile = path.join(root, 'docs', 'bump.json');
+  writeJson(docFile, data);
+  console.log(`[ok] 同步看板数据 docs/bump.json`);
+  return file;
+}
+
+/* ---------------- 主流程（修复了索引与清理的顺序） ---------------- */
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isMain) {
+  try {
+    const r = await capture();
+    if (!DRY_RUN && !r.skipped) {
+      const t = nowParts();
+      // 先清理旧数据
+      const removed = pruneOld(KEEP_DAYS);
+      if (removed) console.log(`[ok] 清理 ${removed} 条超过 ${KEEP_DAYS} 天的记录`);
+
+      const removedXlsx = pruneOldExports(KEEP_DAYS);
+      if (removedXlsx) console.log(`[ok] 清理 ${removedXlsx} 个过期 Excel`);
+
+      // 再重建索引
+      const items = rebuildIndex();
+      console.log(`[ok] 索引已更新：共 ${items.length} 条记录`);
+
+      // 再生成排名时序数据
+      writeBump();
+
+      // 最后生成 Excel
+      if (!r.dryRun) writeDayWorkbook(t.date);
+    }
+  } catch (e) {
+    console.error('[fail]', e.message);
+    process.exit(1);
+  }
 }

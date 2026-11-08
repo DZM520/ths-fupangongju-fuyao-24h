@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同花顺热榜 · 排名变化</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --text: #1f1f1f;
+    --muted: #7a7a7a;
+    --border: #e8e8e4;
+    --up: #e24b4a;   /* 涨 = 红 */
+    --down: #1d9e75; /* 跌 = 绿 */
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px 48px; }
+  header { margin-bottom: 16px; }
+  header h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+  .meta .pill {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 10px; font-size: 12px; color: var(--muted);
+  }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: none; background: var(--card); color: var(--muted);
+    padding: 5px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .seg button.on { background: #185fa5; color: #fff; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 16px 10px;
+  }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .legend-hint { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .layout { display: grid; grid-template-columns: 1fr 240px; gap: 0; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  .chart-box { position: relative; }
+  .side {
+    padding: 4px 0 4px 16px;
+    border-left: 1px solid var(--border);
+    max-height: 720px; overflow-y: auto;
+  }
+  @media (max-width: 860px) { .side { border-left: none; border-top: 1px solid var(--border); padding: 12px 0 0; max-height: none; } }
+  .side .s-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+  .stock-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; font-size: 13px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+  .rk { font-weight: 600; min-width: 26px; text-align: right; }
+  .nm { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pct { font-size: 12px; min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+  .flat { color: var(--muted); }
+  .out { color: var(--muted); font-size: 12px; }
+  .footer { margin-top: 18px; text-align: center; color: var(--muted); font-size: 12px; }
+  .empty { padding: 48px 0; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>同花顺热榜 · 排名变化</h1>
+    <div class="sub">近 24 小时热榜名次走势（Bump Chart）· 红涨绿跌</div>
+    <div class="meta">
+      <span class="pill" id="meta-updated"></span>
+      <span class="pill" id="meta-count"></span>
+      <span class="seg" id="seg">
+        <button data-n="15" class="on">前 15</button>
+        <button data-n="30">前 30</button>
+      </span>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>热榜名次走势</h2>
+    <div class="legend-hint">线越高名次越靠前（第 1 名在最上方）；跌出榜单的线段会断开</div>
+    <div class="empty" id="empty" style="display:none">暂无数据，等待首次抓取…</div>
+    <div class="layout" id="layout" style="display:none">
+      <div class="chart-box"><canvas id="chart" role="img" aria-label="热榜排名变化折线图"></canvas></div>
+      <div class="side">
+        <div class="s-title">当前名次</div>
+        <div id="sideList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">数据来源：同花顺热榜 · docs/bump.json · 每只股票颜色固定不变</div>
+</div>
+
+<script>
+const UP = '#e24b4a', DOWN = '#1d9e75', MUTED = '#b4b2a9';
+
+let chart = null;
+let curN = 15;
+let raw = null;
+
+function fmtPct(v) {
+  if (v == null || !Number.isFinite(v)) return { txt: '-', cls: 'flat' };
+  const p = v.toFixed(2) + '%';
+  if (v > 0) return { txt: '+' + p, cls: 'up' };
+  if (v < 0) return { txt: p, cls: 'down' };
+  return { txt: p, cls: 'flat' };
+}
+function shortTime(s) {
+  if (!s) return '';
+  // "2026-11-08 07:33" -> "07:33"，跨天保留 "MM-DD HH:mm"
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/);
+  return m ? m[4] : s;
+}
+
+function visibleStocks() {
+  // 只显示「当前在榜或历史最佳排名 <= curN」的股票，且按当前名次排序
+  const list = (raw.stocks || []).filter((st) => st.bestRank <= curN);
+  return list;
+}
+
+function render() {
+  const meta = document.getElementById('meta');
+  const elUpd = document.getElementById('meta-updated');
+  const elCnt = document.getElementById('meta-count');
+  elUpd.textContent = raw && raw.updatedAt
+    ? '更新于 ' + new Date(raw.updatedAt).toLocaleString('zh-CN', { hour12: false })
+    : '';
+  elCnt.textContent = raw ? '近 ' + raw.windowHours + ' 小时 · ' + raw.times.length + ' 个时刻' : '';
+
+  const stocks = visibleStocks();
+  if (!stocks.length) {
+    document.getElementById('empty').style.display = 'block';
+    document.getElementById('layout').style.display = 'none';
+    return;
+  }
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('layout').style.display = 'grid';
+
+  const labels = (raw.times || []).map(shortTime);
+  const datasets = stocks.map((st) => ({
+    label: st.name || st.ticker,
+    data: st.ranks,
+    borderColor: st.color,
+    backgroundColor: st.color,
+    borderWidth: 2,
+    pointRadius: 2.5,
+    pointHoverRadius: 5,
+    pointBackgroundColor: st.color,
+    spanGaps: false,
+    tension: 0.25,
+  }));
+
+  const h = Math.max(360, stocks.length * 26 + 80);
+  const box = document.getElementById('chart');
+  box.parentElement.style.height = h + 'px';
+
+  const ctx = box.getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => raw.times[items[0].dataIndex] || '',
+            label: (c) => ' ' + (c.dataset.label || '') + ' · #' + c.raw
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: '时间', color: MUTED, font: { size: 11 } },
+          grid: { display: false },
+          ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 24, font: { size: 10 }, color: MUTED }
+        },
+        y: {
+          reverse: true,
+          min: 0.5,
+          max: curN + 0.5,
+          title: { display: true, text: '排名', color: MUTED, font: { size: 11 } },
+          grid: { color: '#f0f0ed' },
+          ticks: {
+            stepSize: 1,
+            font: { size: 10 }, color: MUTED,
+            callback: (v) => (Number.isInteger(v) ? '#' + v : '')
+          }
+        }
+      }
+    }
+  });
+
+  // 右侧当前名次列表
+  const side = document.getElementById('sideList');
+  side.innerHTML = stocks.map((st) => {
+    const p = fmtPct(st.lastChangePct);
+    const inNow = st.lastRank != null;
+    return '<div class="stock-row">' +
+      '<span class="dot" style="background:' + st.color + '"></span>' +
+      '<span class="rk">' + (inNow ? '#' + st.lastRank : '') + '</span>' +
+      '<span class="nm ' + (inNow ? '' : 'out') + '">' + (st.name || st.ticker) + (inNow ? '' : ' <span class="out">(跌出)</span>') + '</span>' +
+      '<span class="pct ' + p.cls + '">' + p.txt + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+async function load() {
+  try {
+    const resp = await fetch('./bump.json', { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    raw = await resp.json();
+    render();
+  } catch (e) {
+    document.getElementById('meta-updated').textContent = '数据加载失败：' + (e.message || e);
+    document.getElementById('empty').style.display = 'block';
+  }
+}
+
+document.getElementById('seg').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('button');
+  if (!btn) return;
+  curN = parseInt(btn.dataset.n, 10);
+  document.querySelectorAll('#seg button').forEach((b) => b.classList.toggle('on', b === btn));
+  if (raw) render();
+});
+
+load();
+</script>
+</body>
+</html>
