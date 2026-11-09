@@ -1,0 +1,1010 @@
+{
+  "id": "2026-11-10_03-00",
+  "sheetName": "2026-11-10_03-00",
+  "capturedAt": "2026-11-10 03:00",
+  "capturedAtIso": "2026-11-09T19:00:20.013Z",
+  "timezone": "Asia/Shanghai",
+  "count": 100,
+  "rows": [
+    {
+      "rank": 1,
+      "ticker": "002086",
+      "thscode": "002086.SZ",
+      "name": "东方海洋",
+      "price": 4.37,
+      "changePct": 10.075567,
+      "heat": 647329,
+      "exchange": "深"
+    },
+    {
+      "rank": 2,
+      "ticker": "002639",
+      "thscode": "002639.SZ",
+      "name": "雪人集团",
+      "price": 15.95,
+      "changePct": 10,
+      "heat": 497046,
+      "exchange": "深"
+    },
+    {
+      "rank": 3,
+      "ticker": "603366",
+      "thscode": "603366.SH",
+      "name": "日出东方",
+      "price": 9.89,
+      "changePct": 10.011123,
+      "heat": 405072,
+      "exchange": "沪"
+    },
+    {
+      "rank": 4,
+      "ticker": "000530",
+      "thscode": "000530.SZ",
+      "name": "冰山冷热",
+      "price": 9.57,
+      "changePct": 10,
+      "heat": 373642,
+      "exchange": "深"
+    },
+    {
+      "rank": 5,
+      "ticker": "002242",
+      "thscode": "002242.SZ",
+      "name": "九阳股份",
+      "price": 26.1,
+      "changePct": 3.984064,
+      "heat": 368065,
+      "exchange": "深"
+    },
+    {
+      "rank": 6,
+      "ticker": "600261",
+      "thscode": "600261.SH",
+      "name": "阳光照明",
+      "price": 5.32,
+      "changePct": -1.481481,
+      "heat": 349066,
+      "exchange": "沪"
+    },
+    {
+      "rank": 7,
+      "ticker": "601599",
+      "thscode": "601599.SH",
+      "name": "浙文影业",
+      "price": 5.38,
+      "changePct": 5.905512,
+      "heat": 326619,
+      "exchange": "沪"
+    },
+    {
+      "rank": 8,
+      "ticker": "002578",
+      "thscode": "002578.SZ",
+      "name": "闽发铝业",
+      "price": 5.51,
+      "changePct": 9.98004,
+      "heat": 308773,
+      "exchange": "深"
+    },
+    {
+      "rank": 9,
+      "ticker": "002310",
+      "thscode": "002310.SZ",
+      "name": "东方新能",
+      "price": 2.55,
+      "changePct": 9.913793,
+      "heat": 291299,
+      "exchange": "深"
+    },
+    {
+      "rank": 10,
+      "ticker": "000525",
+      "thscode": "000525.SZ",
+      "name": "红太阳",
+      "price": 5.52,
+      "changePct": 9.960159,
+      "heat": 268445,
+      "exchange": "深"
+    },
+    {
+      "rank": 11,
+      "ticker": "600825",
+      "thscode": "600825.SH",
+      "name": "新华传媒",
+      "price": 13.65,
+      "changePct": 5.486862,
+      "heat": 236663,
+      "exchange": "沪"
+    },
+    {
+      "rank": 12,
+      "ticker": "688836",
+      "thscode": "688836.SH",
+      "name": "宇树科技",
+      "price": 716,
+      "changePct": 9.043282,
+      "heat": 225852,
+      "exchange": "沪"
+    },
+    {
+      "rank": 13,
+      "ticker": "002565",
+      "thscode": "002565.SZ",
+      "name": "顺灏股份",
+      "price": 10.54,
+      "changePct": 10.020877,
+      "heat": 225844,
+      "exchange": "深"
+    },
+    {
+      "rank": 14,
+      "ticker": "601188",
+      "thscode": "601188.SH",
+      "name": "龙江交通",
+      "price": 4.19,
+      "changePct": 9.973753,
+      "heat": 217980,
+      "exchange": "沪"
+    },
+    {
+      "rank": 15,
+      "ticker": "002724",
+      "thscode": "002724.SZ",
+      "name": "海洋王",
+      "price": 12.9,
+      "changePct": 7.769424,
+      "heat": 210834,
+      "exchange": "深"
+    },
+    {
+      "rank": 16,
+      "ticker": "002384",
+      "thscode": "002384.SZ",
+      "name": "东山精密",
+      "price": 81.49,
+      "changePct": 1.62115,
+      "heat": 210215,
+      "exchange": "深"
+    },
+    {
+      "rank": 17,
+      "ticker": "600327",
+      "thscode": "600327.SH",
+      "name": "大东方",
+      "price": 5.4,
+      "changePct": 9.979633,
+      "heat": 209569,
+      "exchange": "沪"
+    },
+    {
+      "rank": 18,
+      "ticker": "002889",
+      "thscode": "002889.SZ",
+      "name": "东方嘉盛",
+      "price": 16.4,
+      "changePct": 9.993293,
+      "heat": 208984,
+      "exchange": "深"
+    },
+    {
+      "rank": 19,
+      "ticker": "600715",
+      "thscode": "600715.SH",
+      "name": "文投控股",
+      "price": 2.59,
+      "changePct": 10.212766,
+      "heat": 206539,
+      "exchange": "沪"
+    },
+    {
+      "rank": 20,
+      "ticker": "000678",
+      "thscode": "000678.SZ",
+      "name": "襄阳轴承",
+      "price": 17.51,
+      "changePct": -1.46314,
+      "heat": 203540,
+      "exchange": "深"
+    },
+    {
+      "rank": 21,
+      "ticker": "300308",
+      "thscode": "300308.SZ",
+      "name": "中际旭创",
+      "price": 452.03,
+      "changePct": 0.899554,
+      "heat": 195744,
+      "exchange": "深"
+    },
+    {
+      "rank": 22,
+      "ticker": "002088",
+      "thscode": "002088.SZ",
+      "name": "鲁阳节能",
+      "price": 11.08,
+      "changePct": -0.090171,
+      "heat": 185464,
+      "exchange": "深"
+    },
+    {
+      "rank": 23,
+      "ticker": "300118",
+      "thscode": "300118.SZ",
+      "name": "东方日升",
+      "price": 10.85,
+      "changePct": 5.647517,
+      "heat": 175799,
+      "exchange": "深"
+    },
+    {
+      "rank": 24,
+      "ticker": "600838",
+      "thscode": "600838.SH",
+      "name": "上海九百",
+      "price": 11.5,
+      "changePct": 10.047847,
+      "heat": 175500,
+      "exchange": "沪"
+    },
+    {
+      "rank": 25,
+      "ticker": "002149",
+      "thscode": "002149.SZ",
+      "name": "西部材料",
+      "price": 41.51,
+      "changePct": 9.989401,
+      "heat": 175004,
+      "exchange": "深"
+    },
+    {
+      "rank": 26,
+      "ticker": "600371",
+      "thscode": "600371.SH",
+      "name": "万向德农",
+      "price": 13.51,
+      "changePct": 9.039548,
+      "heat": 171672,
+      "exchange": "沪"
+    },
+    {
+      "rank": 27,
+      "ticker": "001219",
+      "thscode": "001219.SZ",
+      "name": "青岛食品",
+      "price": 24.06,
+      "changePct": 6.98088,
+      "heat": 170638,
+      "exchange": "深"
+    },
+    {
+      "rank": 28,
+      "ticker": "000823",
+      "thscode": "000823.SZ",
+      "name": "超声电子",
+      "price": 17.86,
+      "changePct": 9.975369,
+      "heat": 165657,
+      "exchange": "深"
+    },
+    {
+      "rank": 29,
+      "ticker": "600118",
+      "thscode": "600118.SH",
+      "name": "中国卫星",
+      "price": 57.5,
+      "changePct": 4.545455,
+      "heat": 159708,
+      "exchange": "沪"
+    },
+    {
+      "rank": 30,
+      "ticker": "688825",
+      "thscode": "688825.SH",
+      "name": "长鑫科技",
+      "price": 39.99,
+      "changePct": -1.039347,
+      "heat": 157113,
+      "exchange": "沪"
+    },
+    {
+      "rank": 31,
+      "ticker": "300413",
+      "thscode": "300413.SZ",
+      "name": "芒果超媒",
+      "price": 35.8,
+      "changePct": 2.784955,
+      "heat": 154267,
+      "exchange": "深"
+    },
+    {
+      "rank": 32,
+      "ticker": "002708",
+      "thscode": "002708.SZ",
+      "name": "光洋股份",
+      "price": 21.97,
+      "changePct": 10.015023,
+      "heat": 149750,
+      "exchange": "深"
+    },
+    {
+      "rank": 33,
+      "ticker": "600127",
+      "thscode": "600127.SH",
+      "name": "金健米业",
+      "price": 10.9,
+      "changePct": -2.5916,
+      "heat": 148324,
+      "exchange": "沪"
+    },
+    {
+      "rank": 34,
+      "ticker": "002865",
+      "thscode": "002865.SZ",
+      "name": "钧达股份",
+      "price": 44.45,
+      "changePct": -0.313972,
+      "heat": 146296,
+      "exchange": "深"
+    },
+    {
+      "rank": 35,
+      "ticker": "600776",
+      "thscode": "600776.SH",
+      "name": "东方通信",
+      "price": 12.22,
+      "changePct": 9.990999,
+      "heat": 145442,
+      "exchange": "沪"
+    },
+    {
+      "rank": 36,
+      "ticker": "600637",
+      "thscode": "600637.SH",
+      "name": "东方明珠",
+      "price": 8.64,
+      "changePct": 6.930693,
+      "heat": 145277,
+      "exchange": "沪"
+    },
+    {
+      "rank": 37,
+      "ticker": "002172",
+      "thscode": "002172.SZ",
+      "name": "澳洋健康",
+      "price": 6.18,
+      "changePct": 9.964413,
+      "heat": 140785,
+      "exchange": "深"
+    },
+    {
+      "rank": 38,
+      "ticker": "600892",
+      "thscode": "600892.SH",
+      "name": "大晟文化",
+      "price": 5.09,
+      "changePct": 9.935205,
+      "heat": 139963,
+      "exchange": "沪"
+    },
+    {
+      "rank": 39,
+      "ticker": "002636",
+      "thscode": "002636.SZ",
+      "name": "金安国纪",
+      "price": 66.03,
+      "changePct": 0.121304,
+      "heat": 137306,
+      "exchange": "深"
+    },
+    {
+      "rank": 40,
+      "ticker": "600278",
+      "thscode": "600278.SH",
+      "name": "东方创业",
+      "price": 7.83,
+      "changePct": 9.97191,
+      "heat": 136158,
+      "exchange": "沪"
+    },
+    {
+      "rank": 41,
+      "ticker": "300502",
+      "thscode": "300502.SZ",
+      "name": "新易盛",
+      "price": 176,
+      "changePct": 2.266124,
+      "heat": 130040,
+      "exchange": "深"
+    },
+    {
+      "rank": 42,
+      "ticker": "002611",
+      "thscode": "002611.SZ",
+      "name": "东方精工",
+      "price": 14.73,
+      "changePct": 5.89504,
+      "heat": 125652,
+      "exchange": "深"
+    },
+    {
+      "rank": 43,
+      "ticker": "688585",
+      "thscode": "688585.SH",
+      "name": "上纬新材",
+      "price": 216.02,
+      "changePct": 19.997778,
+      "heat": 124339,
+      "exchange": "沪"
+    },
+    {
+      "rank": 44,
+      "ticker": "603601",
+      "thscode": "603601.SH",
+      "name": "再升科技",
+      "price": 8.2,
+      "changePct": 3.666245,
+      "heat": 122219,
+      "exchange": "沪"
+    },
+    {
+      "rank": 45,
+      "ticker": "600121",
+      "thscode": "600121.SH",
+      "name": "郑州煤电",
+      "price": 4.73,
+      "changePct": 10,
+      "heat": 121842,
+      "exchange": "沪"
+    },
+    {
+      "rank": 46,
+      "ticker": "600641",
+      "thscode": "600641.SH",
+      "name": "先导基电",
+      "price": 32.72,
+      "changePct": 4.203822,
+      "heat": 121278,
+      "exchange": "沪"
+    },
+    {
+      "rank": 47,
+      "ticker": "600206",
+      "thscode": "600206.SH",
+      "name": "有研新材",
+      "price": 38.3,
+      "changePct": 0.026116,
+      "heat": 117132,
+      "exchange": "沪"
+    },
+    {
+      "rank": 48,
+      "ticker": "603703",
+      "thscode": "603703.SH",
+      "name": "盛洋科技",
+      "price": 11.1,
+      "changePct": 10.009911,
+      "heat": 115314,
+      "exchange": "沪"
+    },
+    {
+      "rank": 49,
+      "ticker": "002388",
+      "thscode": "002388.SZ",
+      "name": "新亚制程",
+      "price": 6.82,
+      "changePct": 2.248876,
+      "heat": 115128,
+      "exchange": "深"
+    },
+    {
+      "rank": 50,
+      "ticker": "603278",
+      "thscode": "603278.SH",
+      "name": "大业股份",
+      "price": 13.73,
+      "changePct": 1.179071,
+      "heat": 114608,
+      "exchange": "沪"
+    },
+    {
+      "rank": 51,
+      "ticker": "605488",
+      "thscode": "605488.SH",
+      "name": "福莱新材",
+      "price": 52.09,
+      "changePct": 6.501738,
+      "heat": 114036,
+      "exchange": "沪"
+    },
+    {
+      "rank": 52,
+      "ticker": "600487",
+      "thscode": "600487.SH",
+      "name": "亨通光电",
+      "price": 42.21,
+      "changePct": 3.202934,
+      "heat": 112281,
+      "exchange": "沪"
+    },
+    {
+      "rank": 53,
+      "ticker": "601138",
+      "thscode": "601138.SH",
+      "name": "工业富联",
+      "price": 42.57,
+      "changePct": 4.568902,
+      "heat": 111270,
+      "exchange": "沪"
+    },
+    {
+      "rank": 54,
+      "ticker": "603381",
+      "thscode": "603381.SH",
+      "name": "永臻股份",
+      "price": 19.9,
+      "changePct": -4.050145,
+      "heat": 108495,
+      "exchange": "沪"
+    },
+    {
+      "rank": 55,
+      "ticker": "002931",
+      "thscode": "002931.SZ",
+      "name": "锋龙股份",
+      "price": 43.86,
+      "changePct": 10.007524,
+      "heat": 107962,
+      "exchange": "深"
+    },
+    {
+      "rank": 56,
+      "ticker": "002361",
+      "thscode": "002361.SZ",
+      "name": "神剑股份",
+      "price": 9.69,
+      "changePct": 2,
+      "heat": 106882,
+      "exchange": "深"
+    },
+    {
+      "rank": 57,
+      "ticker": "300136",
+      "thscode": "300136.SZ",
+      "name": "信维通信",
+      "price": 47.7,
+      "changePct": 12.765957,
+      "heat": 106053,
+      "exchange": "深"
+    },
+    {
+      "rank": 58,
+      "ticker": "002929",
+      "thscode": "002929.SZ",
+      "name": "润建股份",
+      "price": 59,
+      "changePct": -6.512439,
+      "heat": 105985,
+      "exchange": "深"
+    },
+    {
+      "rank": 59,
+      "ticker": "002463",
+      "thscode": "002463.SZ",
+      "name": "沪电股份",
+      "price": 77.1,
+      "changePct": 5.313482,
+      "heat": 105682,
+      "exchange": "深"
+    },
+    {
+      "rank": 60,
+      "ticker": "002696",
+      "thscode": "002696.SZ",
+      "name": "百洋股份",
+      "price": 11.3,
+      "changePct": 2.169982,
+      "heat": 101739,
+      "exchange": "深"
+    },
+    {
+      "rank": 61,
+      "ticker": "000995",
+      "thscode": "000995.SZ",
+      "name": "皇台酒业",
+      "price": 16.7,
+      "changePct": 1.643335,
+      "heat": 101234,
+      "exchange": "深"
+    },
+    {
+      "rank": 62,
+      "ticker": "002712",
+      "thscode": "002712.SZ",
+      "name": "思美传媒",
+      "price": 5.87,
+      "changePct": -1.510067,
+      "heat": 101161,
+      "exchange": "深"
+    },
+    {
+      "rank": 63,
+      "ticker": "603986",
+      "thscode": "603986.SH",
+      "name": "兆易创新",
+      "price": 238.41,
+      "changePct": -0.450958,
+      "heat": 101141,
+      "exchange": "沪"
+    },
+    {
+      "rank": 64,
+      "ticker": "002347",
+      "thscode": "002347.SZ",
+      "name": "泰尔股份",
+      "price": 7,
+      "changePct": 10.062893,
+      "heat": 99994,
+      "exchange": "深"
+    },
+    {
+      "rank": 65,
+      "ticker": "300274",
+      "thscode": "300274.SZ",
+      "name": "阳光电源",
+      "price": 77.85,
+      "changePct": -5.026229,
+      "heat": 99027,
+      "exchange": "深"
+    },
+    {
+      "rank": 66,
+      "ticker": "002428",
+      "thscode": "002428.SZ",
+      "name": "云南锗业",
+      "price": 74.37,
+      "changePct": 2.678448,
+      "heat": 98937,
+      "exchange": "深"
+    },
+    {
+      "rank": 67,
+      "ticker": "301313",
+      "thscode": "301313.SZ",
+      "name": "凡拓数创",
+      "price": 69.77,
+      "changePct": 2.784325,
+      "heat": 94597,
+      "exchange": "深"
+    },
+    {
+      "rank": 68,
+      "ticker": "301010",
+      "thscode": "301010.SZ",
+      "name": "晶雪节能",
+      "price": 26.21,
+      "changePct": 20.009158,
+      "heat": 92996,
+      "exchange": "深"
+    },
+    {
+      "rank": 69,
+      "ticker": "002343",
+      "thscode": "002343.SZ",
+      "name": "慈文传媒",
+      "price": 8.48,
+      "changePct": -1.165501,
+      "heat": 90887,
+      "exchange": "深"
+    },
+    {
+      "rank": 70,
+      "ticker": "002081",
+      "thscode": "002081.SZ",
+      "name": "金螳螂",
+      "price": 4.48,
+      "changePct": 0.900901,
+      "heat": 90285,
+      "exchange": "深"
+    },
+    {
+      "rank": 71,
+      "ticker": "002124",
+      "thscode": "002124.SZ",
+      "name": "天邦食品",
+      "price": 2.2,
+      "changePct": 10,
+      "heat": 90021,
+      "exchange": "深"
+    },
+    {
+      "rank": 72,
+      "ticker": "002300",
+      "thscode": "002300.SZ",
+      "name": "太阳电缆",
+      "price": 8.91,
+      "changePct": 4.454865,
+      "heat": 89544,
+      "exchange": "深"
+    },
+    {
+      "rank": 73,
+      "ticker": "300006",
+      "thscode": "300006.SZ",
+      "name": "莱美药业",
+      "price": 11.16,
+      "changePct": 14.344262,
+      "heat": 88032,
+      "exchange": "深"
+    },
+    {
+      "rank": 74,
+      "ticker": "601595",
+      "thscode": "601595.SH",
+      "name": "上海电影",
+      "price": 38.7,
+      "changePct": 8.221477,
+      "heat": 87733,
+      "exchange": "沪"
+    },
+    {
+      "rank": 75,
+      "ticker": "603706",
+      "thscode": "603706.SH",
+      "name": "东方环宇",
+      "price": 20.19,
+      "changePct": 10.027248,
+      "heat": 87725,
+      "exchange": "沪"
+    },
+    {
+      "rank": 76,
+      "ticker": "601086",
+      "thscode": "601086.SH",
+      "name": "国芳集团",
+      "price": 13.39,
+      "changePct": 5.350118,
+      "heat": 85371,
+      "exchange": "沪"
+    },
+    {
+      "rank": 77,
+      "ticker": "600853",
+      "thscode": "600853.SH",
+      "name": "龙建股份",
+      "price": 3.85,
+      "changePct": 10,
+      "heat": 84703,
+      "exchange": "沪"
+    },
+    {
+      "rank": 78,
+      "ticker": "600540",
+      "thscode": "600540.SH",
+      "name": "新赛股份",
+      "price": 4.96,
+      "changePct": 8.296943,
+      "heat": 84362,
+      "exchange": "沪"
+    },
+    {
+      "rank": 79,
+      "ticker": "600498",
+      "thscode": "600498.SH",
+      "name": "烽火通信",
+      "price": 28.83,
+      "changePct": 6.777778,
+      "heat": 82553,
+      "exchange": "沪"
+    },
+    {
+      "rank": 80,
+      "ticker": "002249",
+      "thscode": "002249.SZ",
+      "name": "大洋电机",
+      "price": 7.58,
+      "changePct": 2.849389,
+      "heat": 82377,
+      "exchange": "深"
+    },
+    {
+      "rank": 81,
+      "ticker": "600408",
+      "thscode": "600408.SH",
+      "name": "安泰集团",
+      "price": 3.32,
+      "changePct": 9.933775,
+      "heat": 82301,
+      "exchange": "沪"
+    },
+    {
+      "rank": 82,
+      "ticker": "300750",
+      "thscode": "300750.SZ",
+      "name": "宁德时代",
+      "price": 248.64,
+      "changePct": -2.194949,
+      "heat": 81091,
+      "exchange": "深"
+    },
+    {
+      "rank": 83,
+      "ticker": "603259",
+      "thscode": "603259.SH",
+      "name": "药明康德",
+      "price": 150.29,
+      "changePct": 2.238095,
+      "heat": 79692,
+      "exchange": "沪"
+    },
+    {
+      "rank": 84,
+      "ticker": "002185",
+      "thscode": "002185.SZ",
+      "name": "华天科技",
+      "price": 14.36,
+      "changePct": -0.277778,
+      "heat": 78861,
+      "exchange": "深"
+    },
+    {
+      "rank": 85,
+      "ticker": "002156",
+      "thscode": "002156.SZ",
+      "name": "通富微电",
+      "price": 43.21,
+      "changePct": -1.683732,
+      "heat": 78093,
+      "exchange": "深"
+    },
+    {
+      "rank": 86,
+      "ticker": "600865",
+      "thscode": "600865.SH",
+      "name": "百大集团",
+      "price": 12.83,
+      "changePct": 6.120761,
+      "heat": 77704,
+      "exchange": "沪"
+    },
+    {
+      "rank": 87,
+      "ticker": "603131",
+      "thscode": "603131.SH",
+      "name": "上海沪工",
+      "price": 16.91,
+      "changePct": 4.705882,
+      "heat": 76979,
+      "exchange": "沪"
+    },
+    {
+      "rank": 88,
+      "ticker": "002275",
+      "thscode": "002275.SZ",
+      "name": "桂林三金",
+      "price": 17.15,
+      "changePct": -5.769231,
+      "heat": 76715,
+      "exchange": "深"
+    },
+    {
+      "rank": 89,
+      "ticker": "000725",
+      "thscode": "000725.SZ",
+      "name": "京东方A",
+      "price": 4.46,
+      "changePct": 0,
+      "heat": 75335,
+      "exchange": "深"
+    },
+    {
+      "rank": 90,
+      "ticker": "600792",
+      "thscode": "600792.SH",
+      "name": "云煤能源",
+      "price": 4.2,
+      "changePct": 9.947644,
+      "heat": 75311,
+      "exchange": "沪"
+    },
+    {
+      "rank": 91,
+      "ticker": "002181",
+      "thscode": "002181.SZ",
+      "name": "粤传媒",
+      "price": 11.53,
+      "changePct": 2.488889,
+      "heat": 74969,
+      "exchange": "深"
+    },
+    {
+      "rank": 92,
+      "ticker": "605577",
+      "thscode": "605577.SH",
+      "name": "龙版传媒",
+      "price": 15.71,
+      "changePct": 1.224227,
+      "heat": 74630,
+      "exchange": "沪"
+    },
+    {
+      "rank": 93,
+      "ticker": "000533",
+      "thscode": "000533.SZ",
+      "name": "顺钠股份",
+      "price": 10.1,
+      "changePct": 5.098855,
+      "heat": 74551,
+      "exchange": "深"
+    },
+    {
+      "rank": 94,
+      "ticker": "002029",
+      "thscode": "002029.SZ",
+      "name": "七匹狼",
+      "price": 9.05,
+      "changePct": 1.685393,
+      "heat": 74035,
+      "exchange": "深"
+    },
+    {
+      "rank": 95,
+      "ticker": "001316",
+      "thscode": "001316.SZ",
+      "name": "润贝航科",
+      "price": 30.6,
+      "changePct": 9.992811,
+      "heat": 73839,
+      "exchange": "深"
+    },
+    {
+      "rank": 96,
+      "ticker": "002811",
+      "thscode": "002811.SZ",
+      "name": "郑中设计",
+      "price": 22.59,
+      "changePct": 9.980526,
+      "heat": 73761,
+      "exchange": "深"
+    },
+    {
+      "rank": 97,
+      "ticker": "600207",
+      "thscode": "600207.SH",
+      "name": "安彩高科",
+      "price": 5.14,
+      "changePct": 5.327869,
+      "heat": 73730,
+      "exchange": "沪"
+    },
+    {
+      "rank": 98,
+      "ticker": "001381",
+      "thscode": "001381.SZ",
+      "name": "皇冠新材",
+      "price": 44.49,
+      "changePct": -6.000423,
+      "heat": 72574,
+      "exchange": "深"
+    },
+    {
+      "rank": 99,
+      "ticker": "001309",
+      "thscode": "001309.SZ",
+      "name": "德明利",
+      "price": 187.37,
+      "changePct": 0.763646,
+      "heat": 72038,
+      "exchange": "深"
+    },
+    {
+      "rank": 100,
+      "ticker": "002354",
+      "thscode": "002354.SZ",
+      "name": "天娱数科",
+      "price": 8.09,
+      "changePct": -0.369458,
+      "heat": 71877,
+      "exchange": "深"
+    }
+  ]
+}
