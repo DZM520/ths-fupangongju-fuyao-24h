@@ -39,6 +39,16 @@
     padding: 5px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
   }
   .seg button.on { background: #185fa5; color: #fff; }
+  #customN {
+    border: 1px solid var(--border); background: var(--card); color: var(--muted);
+    padding: 5px 14px; font-size: 13px; cursor: pointer; font-family: inherit; border-radius: 8px;
+  }
+  #customN:hover { border-color: #185fa5; color: #185fa5; }
+  #customN.on { background: #185fa5; border-color: #185fa5; color: #fff; }
+  #customInput {
+    width: 72px; padding: 5px 8px; border: 1px solid #185fa5; border-radius: 8px;
+    font-size: 13px; font-family: inherit; color: var(--text); background: var(--card);
+  }
   .card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: 12px; padding: 16px 16px 10px;
@@ -52,13 +62,20 @@
   .flat { color: var(--muted); }
   .footer { margin-top: 18px; text-align: center; color: var(--muted); font-size: 12px; }
   .empty { padding: 48px 0; text-align: center; color: var(--muted); }
-  .snap-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
-  .snap-bar select {
-    flex: 1 1 190px; min-width: 0; max-width: 100%;
-    padding: 6px 8px; border: 1px solid var(--border); border-radius: 7px;
-    background: var(--card); color: var(--text);
-    font-size: 12px; font-family: inherit; cursor: pointer;
+  .snap-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .snap-strip {
+    flex: 1 1 auto; min-width: 0;
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;
   }
+  .snap-strip::-webkit-scrollbar { height: 6px; }
+  .snap-strip::-webkit-scrollbar-thumb { background: #d8d8d3; border-radius: 3px; }
+  .snap-strip button {
+    flex: 0 0 auto; border: 1px solid var(--border); background: var(--card);
+    color: var(--muted); padding: 5px 10px; border-radius: 7px;
+    font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .snap-strip button:hover { border-color: #185fa5; color: #185fa5; }
+  .snap-strip button.on { background: #185fa5; border-color: #185fa5; color: #fff; }
   .snap-bar .mini {
     flex: 0 0 auto; border: 1px solid var(--border); background: var(--card);
     color: var(--muted); padding: 6px 10px; border-radius: 7px;
@@ -112,6 +129,8 @@
         <button data-n="20" class="on">前 20</button>
         <button data-n="30">前 30</button>
       </span>
+      <button id="customN" type="button">自定义</button>
+      <input id="customInput" type="number" min="1" max="100" placeholder="前 N" style="display:none">
       <span class="view-label">视图</span>
       <span class="seg" id="viewSeg">
         <button data-view="split" class="on">并列</button>
@@ -133,12 +152,12 @@
 
     <div class="card panel-snap" id="snapCard" hidden>
       <h2>榜单明细</h2>
-      <div class="legend-hint">选择任意历史时刻（按日期分组），查看当时完整的 100 只热榜股票</div>
+      <div class="legend-hint">左右滑动选择时刻（最新在右），查看当时完整的 100 只热榜股票</div>
       <div class="snap-bar">
-        <select id="snapSelect" aria-label="选择抓取时刻"></select>
-        <button class="mini" id="snapLatest" type="button">回到最新</button>
-        <span class="snap-info" id="snapInfo"></span>
+        <div class="snap-strip" id="snapStrip"></div>
+        <button class="mini" id="snapLatest" type="button">最新</button>
       </div>
+      <span class="snap-info" id="snapInfo"></span>
       <div class="tablewrap">
         <table>
           <thead>
@@ -353,9 +372,44 @@ async function load() {
 document.getElementById('seg').addEventListener('click', (ev) => {
   const btn = ev.target.closest('button');
   if (!btn) return;
-  curN = parseInt(btn.dataset.n, 10);
-  document.querySelectorAll('#seg button').forEach((b) => b.classList.toggle('on', b === btn));
+  setN(btn.dataset.n);
+});
+
+/* ---------------- 走势图「前 N」自定义 ---------------- */
+const customBtn = document.getElementById('customN');
+const customInput = document.getElementById('customInput');
+
+function cancelCustom() {
+  customInput.style.display = 'none';
+  customBtn.style.display = '';
+}
+
+function setN(n) {
+  n = parseInt(n, 10);
+  if (!Number.isFinite(n) || n < 1) { cancelCustom(); return; }
+  if (n > 100) n = 100;
+  curN = n;
+  cancelCustom();
+  document.querySelectorAll('#seg button').forEach((b) => b.classList.toggle('on', parseInt(b.dataset.n, 10) === n));
+  const isCustom = (n !== 20 && n !== 30);
+  customBtn.classList.toggle('on', isCustom);
+  customBtn.textContent = isCustom ? '前 ' + n : '自定义';
   if (raw) render();
+}
+
+customBtn.addEventListener('click', () => {
+  customBtn.style.display = 'none';
+  customInput.style.display = '';
+  customInput.value = curN;
+  customInput.focus();
+  customInput.select();
+});
+customInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); setN(customInput.value); }
+  else if (e.key === 'Escape') { cancelCustom(); }
+});
+customInput.addEventListener('blur', () => {
+  if (customInput.style.display !== 'none') setN(customInput.value);
 });
 
 /* ---------------- 榜单明细（全量历史 · 按需加载） ---------------- */
@@ -374,28 +428,18 @@ let curSnap = null;       // 当前选中时刻的完整榜单
 let curId = '';
 const recCache = new Map();
 
-function buildSnapOptions() {
-  const sel = document.getElementById('snapSelect');
-  // 按日期分组，日期与时刻都写全，不再只显示 HH:mm
-  const groups = new Map();
-  for (const t of feed.times) {
-    const ft = fullTime(t.time);
-    const date = ft.slice(0, 10);
-    if (!groups.has(date)) groups.set(date, []);
-    groups.get(date).push({ id: t.id, time: ft, count: t.count });
-  }
-  let html = '';
-  for (const [date, list] of groups) {           // feed.times 最新在前
-    const d = new Date(date + 'T00:00:00+08:00');
-    const w = Number.isNaN(d.getTime()) ? '' : ' ' + WEEK[d.getDay()];
-    html += '<optgroup label="' + date + w + '（' + list.length + ' 次）">';
-    for (const it of list) {
-      html += '<option value="' + it.id + '">' + it.time + ' · ' + it.count + ' 只</option>';
-    }
-    html += '</optgroup>';
-  }
-  sel.innerHTML = html;
-  if (curId) sel.value = curId;
+function stripTime(s) {
+  const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/);
+  return m ? m[2] + '-' + m[3] + ' ' + m[4] : String(s || '');
+}
+
+function buildSnapStrip() {
+  const strip = document.getElementById('snapStrip');
+  // feed.times 最新在前 → 翻转为时间正序，最新时刻排在最右
+  const times = [...feed.times].reverse();
+  strip.innerHTML = times.map((t) =>
+    '<button data-id="' + t.id + '" title="' + fullTime(t.time) + '">' + stripTime(t.time) + '</button>'
+  ).join('');
 }
 
 async function fetchRecord(id) {
@@ -410,8 +454,9 @@ async function fetchRecord(id) {
 async function selectSnap(id) {
   if (!id) return;
   curId = id;
-  const sel = document.getElementById('snapSelect');
-  if (sel.value !== id) sel.value = id;
+  document.querySelectorAll('#snapStrip button').forEach((b) => b.classList.toggle('on', b.dataset.id === id));
+  const on = document.querySelector('#snapStrip button.on');
+  if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' });
   const info = document.getElementById('snapInfo');
   info.textContent = '加载中…';
   try {
@@ -449,14 +494,17 @@ async function loadFeed() {
     feed = await r.json();
     if (!feed.times || !feed.times.length) return;
     document.getElementById('snapCard').hidden = false;
-    buildSnapOptions();
+    buildSnapStrip();
     await selectSnap(feed.times[0].id);
   } catch (e) {
     console.warn('times.json 加载失败:', e);
   }
 }
 
-document.getElementById('snapSelect').addEventListener('change', (ev) => selectSnap(ev.target.value));
+document.getElementById('snapStrip').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('button');
+  if (btn) selectSnap(btn.dataset.id);
+});
 document.getElementById('snapLatest').addEventListener('click', () => {
   if (feed && feed.times.length) selectSnap(feed.times[0].id);
 });
