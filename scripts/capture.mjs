@@ -60,7 +60,7 @@ function nowParts() {
 const pad = (n) => String(n).padStart(2, '0');
 
 /* ---------------- API（加入重试机制） ---------------- */
-async function apiGet(pathname, params, retries = 3) {
+export async function apiGet(pathname, params, retries = 4) {
   for (let i = 0; i < retries; i++) {
     try {
       const url = new URL(pathname, FUYAO_BASE);
@@ -71,7 +71,7 @@ async function apiGet(pathname, params, retries = 3) {
       });
       const text = await resp.text();
 
-      // 鉴权或限流错误直接抛出，不重试
+      // 鉴权错误直接抛出；限流（429）交给下方退避重试
       if (resp.status === 401 || resp.status === 403) throw new Error(`HTTP ${resp.status} Key 无效或无权限: ${text.slice(0, 120)}`);
       if (resp.status === 429) throw new Error('HTTP 429 调用频率超限');
       if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 160)}`);
@@ -85,11 +85,13 @@ async function apiGet(pathname, params, retries = 3) {
       if (json.code !== 0) throw new Error(`API code=${json.code}: ${json.message || json.msg || '未知错误'}`);
       return json.data;
     } catch (e) {
-      if (i === retries - 1 || e.message.includes('HTTP 401') || e.message.includes('HTTP 403') || e.message.includes('HTTP 429')) {
+      if (i === retries - 1 || e.message.includes('HTTP 401') || e.message.includes('HTTP 403')) {
         throw e;
       }
       console.warn(`[retry] ${pathname} 第 ${i + 1} 次失败：${e.message}`);
-      await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+      // 限流需要长退避（10/20/30s），普通网络错误短退避（2/4/6s）
+      const backoff = e.message.includes('HTTP 429') ? 10000 * (i + 1) : 2000 * (i + 1);
+      await new Promise((r) => setTimeout(r, backoff));
     }
   }
 }
