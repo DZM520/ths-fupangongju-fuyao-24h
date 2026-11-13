@@ -7,13 +7,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
-    --bg: #f7f7f5;
+    --bg: #f5f6f8;
     --card: #ffffff;
-    --text: #1f1f1f;
-    --muted: #7a7a7a;
-    --border: #e8e8e4;
-    --up: #e24b4a;   /* 涨 = 红 */
-    --down: #1d9e75; /* 跌 = 绿 */
+    --text: #1c2430;
+    --muted: #8590a0;
+    --border: #e5e9f0;
+    --accent: #2563eb;
+    --accent-weak: #eef4ff;
+    --up: #e2413f;   /* 涨 = 红 */
+    --down: #149968; /* 跌 = 绿 */
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.05);
   }
   * { box-sizing: border-box; }
   body {
@@ -23,81 +26,117 @@
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
     line-height: 1.6;
   }
-  .wrap { max-width: 1560px; margin: 0 auto; padding: 24px 20px 48px; }
-  header { margin-bottom: 16px; }
-  header h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .wrap { max-width: 1560px; margin: 0 auto; padding: 28px 24px 40px; }
+
+  /* ---- 头部 ---- */
+  header { margin-bottom: 18px; }
+  .head-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  header h1 { font-size: 24px; font-weight: 700; margin: 0 0 2px; letter-spacing: .5px; }
   header .sub { color: var(--muted); font-size: 13px; }
-  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .meta .pill {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 8px; padding: 4px 10px; font-size: 12px; color: var(--muted);
+    background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow);
+    border-radius: 999px; padding: 4px 12px; font-size: 12px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
   }
-  .view-label { font-size: 12px; color: var(--muted); margin-left: 4px; }
-  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .meta .pill:first-child::before {
+    content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: #22c55e; margin-right: 6px; vertical-align: 1px;
+  }
+
+  /* ---- 控制条 ---- */
+  .ctrl { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+  .ctrl-group { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .view-label { font-size: 12px; color: var(--muted); margin-right: 2px; }
+  .seg {
+    display: inline-flex; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; box-shadow: var(--shadow);
+  }
   .seg button {
-    border: none; background: var(--card); color: var(--muted);
-    padding: 5px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+    border: none; background: transparent; color: var(--muted);
+    padding: 6px 16px; font-size: 13px; cursor: pointer; font-family: inherit;
+    transition: background .15s, color .15s;
   }
-  .seg button.on { background: #185fa5; color: #fff; }
+  .seg button:hover { color: var(--text); }
+  .seg button.on { background: var(--accent); color: #fff; }
   #customN {
     border: 1px solid var(--border); background: var(--card); color: var(--muted);
-    padding: 5px 14px; font-size: 13px; cursor: pointer; font-family: inherit; border-radius: 8px;
+    padding: 6px 16px; font-size: 13px; cursor: pointer; font-family: inherit;
+    border-radius: 10px; box-shadow: var(--shadow); transition: color .15s, border-color .15s;
   }
-  #customN:hover { border-color: #185fa5; color: #185fa5; }
-  #customN.on { background: #185fa5; border-color: #185fa5; color: #fff; }
+  #customN:hover { border-color: var(--accent); color: var(--accent); }
+  #customN.on { background: var(--accent); border-color: var(--accent); color: #fff; }
   #customInput {
-    width: 72px; padding: 5px 8px; border: 1px solid #185fa5; border-radius: 8px;
+    width: 76px; padding: 6px 10px; border: 1px solid var(--accent); border-radius: 10px;
     font-size: 13px; font-family: inherit; color: var(--text); background: var(--card);
+    outline: none; box-shadow: 0 0 0 3px var(--accent-weak);
   }
+
+  /* ---- 卡片 ---- */
   .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 16px 10px;
+    background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow);
+    border-radius: 14px; padding: 18px 18px 12px;
   }
-  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
-  .legend-hint { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+  .card h2::before {
+    content: ''; width: 4px; height: 15px; border-radius: 2px; background: var(--accent);
+  }
+  .legend-hint { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
   .layout { display: grid; grid-template-columns: minmax(0, 1fr); }
   .chart-box { position: relative; }
   .up { color: var(--up); }
   .down { color: var(--down); }
   .flat { color: var(--muted); }
-  .footer { margin-top: 18px; text-align: center; color: var(--muted); font-size: 12px; }
+  .footer {
+    margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border);
+    text-align: center; color: var(--muted); font-size: 12px;
+  }
   .empty { padding: 48px 0; text-align: center; color: var(--muted); }
+
+  /* ---- 榜单滑动条 ---- */
   .snap-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
   .snap-strip {
     flex: 1 1 auto; min-width: 0;
     display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;
   }
   .snap-strip::-webkit-scrollbar { height: 6px; }
-  .snap-strip::-webkit-scrollbar-thumb { background: #d8d8d3; border-radius: 3px; }
+  .snap-strip::-webkit-scrollbar-track { background: transparent; }
+  .snap-strip::-webkit-scrollbar-thumb { background: #d4d9e3; border-radius: 3px; }
   .snap-strip button {
-    flex: 0 0 auto; border: 1px solid var(--border); background: var(--card);
-    color: var(--muted); padding: 5px 10px; border-radius: 7px;
+    flex: 0 0 auto; border: 1px solid transparent; background: var(--accent-weak);
+    color: var(--muted); padding: 4px 10px; border-radius: 8px;
     font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap;
+    font-variant-numeric: tabular-nums; transition: color .15s, background .15s;
   }
-  .snap-strip button:hover { border-color: #185fa5; color: #185fa5; }
-  .snap-strip button.on { background: #185fa5; border-color: #185fa5; color: #fff; }
+  .snap-strip button:hover { color: var(--accent); background: #e0ebff; }
+  .snap-strip button.on { background: var(--accent); color: #fff; }
   .snap-bar .mini {
     flex: 0 0 auto; border: 1px solid var(--border); background: var(--card);
-    color: var(--muted); padding: 6px 10px; border-radius: 7px;
-    font-size: 12px; cursor: pointer; font-family: inherit;
+    color: var(--muted); padding: 5px 12px; border-radius: 8px;
+    font-size: 12px; cursor: pointer; font-family: inherit; transition: color .15s, border-color .15s;
   }
-  .snap-bar .mini:hover { border-color: #185fa5; color: #185fa5; }
+  .snap-bar .mini:hover { border-color: var(--accent); color: var(--accent); }
   .snap-info { font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .tablewrap { max-height: 520px; overflow: auto; border-top: 1px solid var(--border); }
+  .tablewrap { max-height: 520px; overflow: auto; border-top: 1px solid var(--border); margin-top: 4px; }
 
-  /* 表格基础样式 */
-  table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  /* ---- 表格 ---- */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
   thead th {
-    position: sticky; top: 0; z-index: 1; background: var(--card);
-    text-align: left; font-weight: 600; color: var(--muted);
-    padding: 8px 6px; border-bottom: 1px solid var(--border); white-space: nowrap;
+    position: sticky; top: 0; z-index: 1; background: #fafbfd;
+    text-align: left; font-weight: 600; color: var(--muted); font-size: 12px;
+    padding: 9px 8px; border-bottom: 1px solid var(--border); white-space: nowrap;
   }
-  tbody td { padding: 6px; border-bottom: 1px solid #f2f2ef; white-space: nowrap; }
-  tbody tr:hover { background: #fafaf8; }
+  tbody td { padding: 7px 8px; border-bottom: 1px solid #f1f3f7; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: #fafbfd; }
+  tbody tr:hover { background: #f0f5ff; }
   .num { text-align: right; }
-  .rk.top { color: var(--up); }
+  .rk { display: inline-flex; justify-content: center; min-width: 22px; font-weight: 600; }
+  .rk.top {
+    color: var(--up); background: rgba(226,65,63,.09);
+    border-radius: 6px; padding: 1px 0;
+  }
 
-  /* 并列双窗口 + 视图切换 */
+  /* ---- 并列双窗口 + 视图切换 ---- */
   .panels { display: grid; gap: 20px; align-items: stretch; }
   .panels[data-view="split"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .panels[data-view="chart"],
@@ -111,32 +150,44 @@
   .panels[data-view="split"] .panel-snap { display: flex; flex-direction: column; }
   .panels[data-view="split"] .tablewrap { flex: 1 1 auto; min-height: 260px; max-height: none; }
 
-  /* 窄屏：自动降为单栏，可用顶部按钮切换窗口 */
+  /* 窄屏：自动降为单栏 */
   @media (max-width: 1080px) {
     .panels[data-view="split"] { grid-template-columns: minmax(0, 1fr); }
+    .wrap { padding: 20px 14px 32px; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>同花顺热榜 · 排名变化</h1>
-    <div class="sub">近 24 小时热榜名次走势（Bump Chart）· 红涨绿跌</div>
-    <div class="meta">
-      <span class="pill" id="meta-updated"></span>
-      <span class="pill" id="meta-count"></span>
-      <span class="seg" id="seg">
-        <button data-n="20" class="on">前 20</button>
-        <button data-n="30">前 30</button>
-      </span>
-      <button id="customN" type="button">自定义</button>
-      <input id="customInput" type="number" min="1" max="100" placeholder="前 N" style="display:none">
-      <span class="view-label">视图</span>
-      <span class="seg" id="viewSeg">
-        <button data-view="split" class="on">并列</button>
-        <button data-view="chart">走势图</button>
-        <button data-view="table">榜单明细</button>
-      </span>
+    <div class="head-top">
+      <div>
+        <h1>同花顺热榜 · 排名变化</h1>
+        <div class="sub">近 24 小时热榜名次走势（Bump Chart）· 红涨绿跌 · 每只股票颜色固定不变</div>
+      </div>
+      <div class="meta">
+        <span class="pill" id="meta-updated"></span>
+        <span class="pill" id="meta-count"></span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-group">
+        <span class="view-label">范围</span>
+        <span class="seg" id="seg">
+          <button data-n="20" class="on">前 20</button>
+          <button data-n="30">前 30</button>
+        </span>
+        <button id="customN" type="button">自定义</button>
+        <input id="customInput" type="number" min="1" max="100" placeholder="前 N" style="display:none">
+      </div>
+      <div class="ctrl-group">
+        <span class="view-label">视图</span>
+        <span class="seg" id="viewSeg">
+          <button data-view="split" class="on">并列</button>
+          <button data-view="chart">走势图</button>
+          <button data-view="table">榜单明细</button>
+        </span>
+      </div>
     </div>
   </header>
 
@@ -172,11 +223,11 @@
     </div>
   </div>
 
-  <div class="footer">数据来源：同花顺热榜 · docs/bump.json · docs/times.json + docs/records/ · 每只股票颜色固定不变</div>
+  <div class="footer">数据来源：同花顺热榜 · 每小时自动记录 · docs/bump.json + docs/records/</div>
 </div>
 
 <script>
-const UP = '#e24b4a', DOWN = '#1d9e75', MUTED = '#b4b2a9';
+const UP = '#e2413f', DOWN = '#149968', MUTED = '#b6bcc8';
 const LABEL_W = 132;   // 图表右侧留给「股票名 + 涨幅」的宽度
 
 let chart = null;
@@ -344,7 +395,7 @@ function render() {
           min: 0.5,
           max: curN + 0.5,
           title: { display: true, text: '排名', color: MUTED, font: { size: 11 } },
-          grid: { color: '#f0f0ed' },
+          grid: { color: '#eef1f6' },
           ticks: {
             stepSize: 1,
             font: { size: 10 }, color: MUTED,
