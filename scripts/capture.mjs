@@ -60,7 +60,7 @@ function nowParts() {
 const pad = (n) => String(n).padStart(2, '0');
 
 /* ---------------- API（加入重试机制） ---------------- */
-export async function apiGet(pathname, params, retries = 4) {
+export async function apiGet(pathname, params, retries = 6) {
   for (let i = 0; i < retries; i++) {
     try {
       const url = new URL(pathname, FUYAO_BASE);
