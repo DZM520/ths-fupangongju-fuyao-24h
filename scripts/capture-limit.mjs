@@ -69,31 +69,53 @@ function rebuildIndex() {
   return items;
 }
 
+// 保存策略：只在「交易日收盘后」落盘一条 <日期>_15-05；
+// 主 workflow 每 15 分钟跑一次，窗口放宽到 15:00~16:00 防止 15:00 那次早于收盘漏抓，
+// 其它时间一律只查看、不保存。id 固定 15-05，靠文件存在去重（同一天最多一条）。
+const CLOSE_START = 15 * 60;   // 15:00 起即可进入（含 15:00 触发的任务）
+const CLOSE_END = 16 * 60;
+
 try {
   const t = nowParts();
-  // 整点抓取归一到 HH:00，手动可保留实际时刻（这里 Actions 每小时整点跑）
-  const id = `${t.date}_${t.hh}-00`;
-  const hourKey = `${t.date}_${t.hh}`;
-  if (listIds().some((x) => x.startsWith(hourKey))) {
-    console.log(`[skip] 本小时（${hourKey}）已有连板情绪快照，跳过`);
+  const mins = Number(t.hh) * 60 + Number(t.mm);
+
+  // 非收盘窗口：直接跳过，不抓不存（省接口调用）
+  if (mins < CLOSE_START || mins >= CLOSE_END) {
+    console.log(`[skip] 当前 ${t.hh}:${t.mm} 不在收盘窗口 15:00~16:00，不保存`);
+    process.exit(0);
+  }
+
+  const id = `${t.date}_15-05`;
+  if (listIds().includes(id)) {
+    console.log(`[skip] 今日收盘快照 ${id} 已存在，跳过`);
+    process.exit(0);
+  }
+
+  const snap = await fetchSnapshot(new Date());
+  const m = snap.sentiment || {};
+  // 交易日判断：东财节假日回退到最近交易日（staleDays>0 / tradeDate≠今天）则非交易日，不保存
+  const todayCompact = t.date.replace(/-/g, '');
+  const tradeDay = String(snap.tradeDate || '').replace(/-/g, '') === todayCompact && !(snap.staleDays > 0);
+
+  if (!tradeDay) {
+    console.log(`[skip] 今日非交易日（tradeDate=${snap.tradeDate}, staleDays=${snap.staleDays}），不保存`);
+    process.exit(0);
+  }
+
+  snap.id = id;
+  snap.reason = 'close';
+  if (DRY_RUN) {
+    console.log(`[dry-run] ${id} 涨停=${m.limitUp} 炸板=${m.brokenCount} 情绪=${m.score}`);
   } else {
-    const snap = await fetchSnapshot(new Date());
-    snap.id = id;
-    snap.reason = 'hourly';
-    const m = snap.sentiment || {};
-    if (DRY_RUN) {
-      console.log(`[dry-run] ${id} 涨停=${m.limitUp} 炸板=${m.brokenCount} 情绪=${m.score}`);
-    } else {
-      fs.mkdirSync(LIMIT_DIR, { recursive: true });
-      const file = path.join(LIMIT_DIR, `${id}.json`);
-      const tmp = file + '.tmp';
-      fs.writeFileSync(tmp, JSON.stringify(snap), 'utf8');
-      fs.renameSync(tmp, file);
-      const items = rebuildIndex();
-      const removed = pruneOld();
-      console.log(`[ok] 连板情绪 ${id}：涨停 ${m.limitUp} · 炸板 ${m.brokenCount}(${m.brokenRate}%) · 最高 ${m.maxStreak} 板 · 情绪 ${m.score}(${m.level}) → data/limit/${id}.json`);
-      console.log(`[ok] 索引 data/limit-index.json：共 ${items.length} 条${removed ? `，清理 ${removed} 条超期` : ''}`);
-    }
+    fs.mkdirSync(LIMIT_DIR, { recursive: true });
+    const file = path.join(LIMIT_DIR, `${id}.json`);
+    const tmp = file + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(snap), 'utf8');
+    fs.renameSync(tmp, file);
+    const items = rebuildIndex();
+    const removed = pruneOld();
+    console.log(`[ok] 连板情绪收盘 ${id}：涨停 ${m.limitUp} · 炸板 ${m.brokenCount}(${m.brokenRate}%) · 最高 ${m.maxStreak} 板 · 情绪 ${m.score}(${m.level}) → data/limit/${id}.json`);
+    console.log(`[ok] 索引 data/limit-index.json：共 ${items.length} 条${removed ? `，清理 ${removed} 条超期` : ''}`);
   }
 } catch (e) {
   console.error('[fail]', e.message);
