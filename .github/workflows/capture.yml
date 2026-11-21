@@ -5,6 +5,7 @@ name: fuyao-capture
 # 触发方式：
 #   1. schedule（GitHub 自带定时，仅作兜底 —— 实测每天只跑 3~4 次）
 #   2. workflow_dispatch（由外部定时器调用，主驱动 —— 每 15 分钟触发一次）
+#   连板情绪跟着本任务一起抓（capture-limit.mjs 内部按小时去重，每小时写一条）
 #
 # 前提：Settings → Secrets and variables → Actions → 新建 secret：FUYAO_API_KEY
 #
@@ -39,6 +40,13 @@ jobs:
           TZ: Asia/Shanghai
           KEEP_DAYS: "400"
         run: node scripts/capture.mjs
+
+      - name: 抓取连板情绪（跟着主任务跑，脚本内按小时去重）
+        continue-on-error: true   # 连板失败不影响热榜主流程
+        env:
+          TZ: Asia/Shanghai
+          KEEP_DAYS: "3650"
+        run: node scripts/capture-limit.mjs
 
       - name: 提交结果
         run: |
