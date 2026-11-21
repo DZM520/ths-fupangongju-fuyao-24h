@@ -546,14 +546,42 @@ function render() {
       maintainAspectRatio: false,
       layout: { padding: { right: LABEL_W } },
       interaction: { mode: 'index', intersect: false },
-      onClick: (evt, elements) => {
-        if (!elements || !elements.length) return;
-        const st = curStocks[elements[0].datasetIndex];
+      onClick: (evt, elements, ch) => {
+        if (!ch || !evt) return;
+        // 关键修复：interaction 用 mode:'index' 时 elements[0] 永远是第一条线（工商银行）。
+        // 不依赖 elements，直接遍历所有折线的所有点，找与点击位置像素距离最近的点，
+        // 精确定位到用户真正点到的那条线。
+        let bestDs = -1, bestDist = Infinity;
+        try {
+          const px = evt.x, py = evt.y;
+          for (let di = 0; di < ch.data.datasets.length; di++) {
+            const meta = ch.getDatasetMeta(di);
+            const pts = meta && meta.data ? meta.data : [];
+            for (let pi = 0; pi < pts.length; pi++) {
+              const pt = pts[pi];
+              if (!pt || !Number.isFinite(pt.x) || !Number.isFinite(pt.y)) continue;
+              const d = (pt.x - px) * (pt.x - px) + (pt.y - py) * (pt.y - py);
+              if (d < bestDist) { bestDist = d; bestDs = di; }
+            }
+          }
+        } catch (e) {}
+        if (bestDs < 0 && elements && elements.length) bestDs = elements[0].datasetIndex;
+        if (bestDs < 0) return;
+        const st = curStocks[bestDs];
         if (st) setFocus(st.ticker === focusTicker ? '' : st.ticker);
       },
       plugins: {
         legend: { display: false },
         tooltip: {
+          // 半透明，避免移动指针时遮住下方折线与榜单视野
+          backgroundColor: 'rgba(24,32,48,0.60)',
+          titleColor: 'rgba(255,255,255,0.92)',
+          bodyColor: 'rgba(255,255,255,0.88)',
+          borderColor: 'rgba(255,255,255,0.18)',
+          borderWidth: 1,
+          padding: 8,
+          displayColors: false,
+          cornerRadius: 6,
           callbacks: {
             title: (items) => fullTime(raw.times[items[0].dataIndex] || ''),
             label: (c) => {
