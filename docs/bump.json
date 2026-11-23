@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-23T18:00:20.945Z",
+  "updatedAt": "2026-11-23T19:00:19.833Z",
   "windowHours": 24,
   "topN": 30,
   "times": [
@@ -26,7 +26,8 @@
     "2026-11-23 23:00",
     "2026-11-24 00:00",
     "2026-11-24 01:00",
-    "2026-11-24 02:00"
+    "2026-11-24 02:00",
+    "2026-11-24 03:00"
   ],
   "total": 67,
   "stocks": [
@@ -55,6 +56,7 @@
         4,
         4,
         2,
+        1,
         1,
         1,
         1,
@@ -94,6 +96,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 1,
@@ -125,6 +128,7 @@
         6,
         7,
         3,
+        2,
         2,
         2,
         2,
@@ -164,6 +168,7 @@
         3,
         3,
         3,
+        3,
         3
       ],
       "lastRank": 3,
@@ -195,6 +200,7 @@
         12,
         13,
         5,
+        4,
         4,
         4,
         4,
@@ -234,6 +240,7 @@
         5,
         5,
         5,
+        5,
         5
       ],
       "lastRank": 5,
@@ -265,6 +272,7 @@
         18,
         18,
         10,
+        6,
         6,
         6,
         6,
@@ -304,6 +312,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 7,
@@ -335,6 +344,7 @@
         19,
         19,
         11,
+        7,
         7,
         7,
         7,
@@ -374,6 +384,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 8,
@@ -405,6 +416,7 @@
         26,
         22,
         12,
+        8,
         8,
         8,
         8,
@@ -444,6 +456,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 9,
@@ -475,6 +488,7 @@
         20,
         21,
         14,
+        9,
         9,
         9,
         9,
@@ -514,6 +528,7 @@
         10,
         10,
         10,
+        10,
         10
       ],
       "lastRank": 10,
@@ -545,6 +560,7 @@
         29,
         24,
         18,
+        11,
         11,
         11,
         11,
@@ -584,6 +600,7 @@
         12,
         12,
         12,
+        12,
         12
       ],
       "lastRank": 12,
@@ -615,6 +632,7 @@
         7,
         6,
         13,
+        null,
         null,
         null,
         null,
@@ -654,6 +672,7 @@
         13,
         13,
         13,
+        13,
         13
       ],
       "lastRank": 13,
@@ -685,6 +704,7 @@
         null,
         null,
         24,
+        14,
         14,
         14,
         14,
@@ -724,6 +744,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 15,
@@ -755,6 +776,7 @@
         null,
         null,
         25,
+        15,
         15,
         15,
         15,
@@ -794,6 +816,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 16,
@@ -825,6 +848,7 @@
         null,
         null,
         26,
+        16,
         16,
         16,
         16,
@@ -864,6 +888,7 @@
         17,
         17,
         17,
+        17,
         17
       ],
       "lastRank": 17,
@@ -899,6 +924,7 @@
         18,
         18,
         18,
+        18,
         18
       ],
       "lastRank": 18,
@@ -918,6 +944,7 @@
         16,
         18,
         19,
+        null,
         null,
         null,
         null,
@@ -969,6 +996,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 19,
@@ -1000,6 +1028,7 @@
         null,
         null,
         null,
+        19,
         19,
         19,
         19,
@@ -1039,6 +1068,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 20,
@@ -1061,6 +1091,7 @@
         23,
         18,
         20,
+        null,
         null,
         null,
         null,
@@ -1109,6 +1140,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 20,
@@ -1144,6 +1176,7 @@
         20,
         20,
         20,
+        20,
         20
       ],
       "lastRank": 20,
@@ -1163,6 +1196,7 @@
         15,
         20,
         21,
+        null,
         null,
         null,
         null,
@@ -1214,6 +1248,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 21,
@@ -1249,6 +1284,7 @@
         21,
         21,
         21,
+        21,
         21
       ],
       "lastRank": 21,
@@ -1267,6 +1303,7 @@
         null,
         21,
         22,
+        null,
         null,
         null,
         null,
@@ -1319,6 +1356,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 22,
@@ -1354,6 +1392,7 @@
         22,
         22,
         22,
+        22,
         22
       ],
       "lastRank": 22,
@@ -1375,6 +1414,7 @@
         null,
         19,
         23,
+        null,
         null,
         null,
         null,
@@ -1424,6 +1464,7 @@
         23,
         23,
         23,
+        23,
         23
       ],
       "lastRank": 23,
@@ -1455,6 +1496,7 @@
         null,
         null,
         null,
+        24,
         24,
         24,
         24,
@@ -1494,6 +1536,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 25,
@@ -1512,6 +1555,7 @@
         24,
         26,
         25,
+        null,
         null,
         null,
         null,
@@ -1564,6 +1608,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 25,
@@ -1599,6 +1644,7 @@
         25,
         25,
         25,
+        25,
         25
       ],
       "lastRank": 25,
@@ -1629,6 +1675,7 @@
         null,
         28,
         26,
+        null,
         null,
         null,
         null,
@@ -1669,6 +1716,7 @@
         26,
         26,
         26,
+        26,
         26
       ],
       "lastRank": 26,
@@ -1690,6 +1738,7 @@
         null,
         null,
         26,
+        null,
         null,
         null,
         null,
@@ -1739,6 +1788,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 27,
@@ -1774,6 +1824,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 27,
@@ -1787,6 +1838,7 @@
       "color": "#639922",
       "ranks": [
         27,
+        null,
         null,
         null,
         null,
@@ -1844,6 +1896,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 27,
@@ -1869,6 +1922,7 @@
         18,
         20,
         27,
+        null,
         null,
         null,
         null,
@@ -1914,6 +1968,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 27,
@@ -1949,6 +2004,7 @@
         27,
         27,
         27,
+        27,
         27
       ],
       "lastRank": 27,
@@ -1968,6 +2024,7 @@
         29,
         null,
         28,
+        null,
         null,
         null,
         null,
@@ -2019,6 +2076,7 @@
         28,
         28,
         28,
+        28,
         28
       ],
       "lastRank": 28,
@@ -2047,6 +2105,7 @@
         24,
         27,
         28,
+        null,
         null,
         null,
         null,
@@ -2089,6 +2148,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 28,
@@ -2120,6 +2180,7 @@
         17,
         17,
         29,
+        null,
         null,
         null,
         null,
@@ -2159,6 +2220,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 29,
@@ -2174,6 +2236,7 @@
         null,
         null,
         29,
+        null,
         null,
         null,
         null,
@@ -2229,6 +2292,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 29,
@@ -2264,6 +2328,7 @@
         29,
         29,
         29,
+        29,
         29
       ],
       "lastRank": 29,
@@ -2286,6 +2351,7 @@
         15,
         null,
         30,
+        null,
         null,
         null,
         null,
@@ -2334,6 +2400,7 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 30,
@@ -2365,6 +2432,7 @@
         null,
         null,
         null,
+        30,
         30,
         30,
         30,
