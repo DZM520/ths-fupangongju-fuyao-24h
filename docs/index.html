@@ -140,9 +140,23 @@
   .panels { display: grid; gap: 20px; align-items: stretch; }
   .panels[data-view="split"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .panels[data-view="chart"],
-  .panels[data-view="table"] { grid-template-columns: minmax(0, 1fr); }
+  .panels[data-view="table"],
+  .panels[data-view="limit"] { grid-template-columns: minmax(0, 1fr); }
   .panels[data-view="chart"] .panel-snap,
-  .panels[data-view="table"] .panel-chart { display: none; }
+  .panels[data-view="table"] .panel-chart,
+  .panels[data-view="limit"] .panel-chart,
+  .panels[data-view="limit"] .panel-snap { display: none; }
+  .limit-body{padding:6px 2px}
+  .limit-summary{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+  .limit-summary .lb{flex:1 1 110px;background:rgba(127,127,127,.07);border:1px solid rgba(127,127,127,.18);border-radius:10px;padding:10px 12px}
+  .limit-summary .lb .k{font-size:11px;opacity:.7}
+  .limit-summary .lb .v{font-size:19px;font-weight:700;margin-top:3px}
+  .limit-ladder{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .limit-tier{display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(127,127,127,.16);border-radius:10px;padding:9px 11px}
+  .limit-tier .lv{min-width:52px;font-weight:700;color:var(--up,#e2413f)}
+  .limit-tier .lst{display:flex;flex-wrap:wrap;gap:6px}
+  .limit-tier .st{background:rgba(127,127,127,.08);border-radius:7px;padding:4px 8px;font-size:12px}
+  .limit-tier .st small{opacity:.65;margin-left:4px}
   .panels .card { min-width: 0; margin-top: 0; }
   [hidden] { display: none !important; }
 
@@ -213,6 +227,7 @@
           <button data-view="split" class="on">并列</button>
           <button data-view="chart">走势图</button>
           <button data-view="table">榜单明细</button>
+          <button data-view="limit">连板情绪</button>
         </span>
       </div>
     </div>
@@ -268,6 +283,17 @@
           <tbody id="snapBody"></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="card panel-limit" id="limitCard" hidden>
+      <h2>连板情绪 · 云端每日收盘快照</h2>
+      <div class="legend-hint">数据来自 GitHub 仓库 data/limit/，每个交易日 15:05 存一条 · 左右选择日期查看当天涨停梯队与情绪</div>
+      <div class="snap-bar">
+        <div class="snap-strip" id="limitStrip"></div>
+        <button class="mini" id="limitLatest" type="button">最新</button>
+      </div>
+      <span class="snap-info" id="limitInfo"></span>
+      <div id="limitBody" class="limit-body"></div>
     </div>
   </div>
 
@@ -707,8 +733,9 @@ if (segEl) segEl.addEventListener('click', (ev) => {
 /* ---------------- 视图切换：并列 / 仅走势图 / 仅明细 ---------------- */
 const panels = document.getElementById('panels');
 function setView(v, save) {
-  if (!['split', 'chart', 'table'].includes(v)) return;
+  if (!['split', 'chart', 'table', 'limit'].includes(v)) return;
   panels.dataset.view = v;
+  if (v === 'limit') { const lc = document.getElementById('limitCard'); if (lc) lc.hidden = false; loadLimit(); }
   document.querySelectorAll('#viewSeg button').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
   if (save) { try { localStorage.setItem('fuyao-view', v); } catch (e) {} }
   requestAnimationFrame(() => requestAnimationFrame(() => { if (chart) chart.resize(); }));
@@ -764,6 +791,70 @@ if (snapStrip) snapStrip.addEventListener('click', (ev) => {
 });
 const snapLatest = document.getElementById('snapLatest');
 if (snapLatest) snapLatest.addEventListener('click', () => { if (feed && feed.times.length) selectSnap(feed.times[0].id); });
+
+/* ---------------- 连板情绪（云端每日收盘快照，读仓库根 data/） ---------------- */
+const LIMIT_CDN = 'https://cdn.jsdelivr.net/gh/DZM520/ths-fupangongju-fuyao-24h@main/';
+let limitIndex = null, limitLoaded = false;
+async function limitFetch(rel) {
+  // Pages 只发布 docs/，数据用 jsdelivr 读仓库根；本地 file 打开同样用工 CDN
+  const r = await fetch(LIMIT_CDN + rel, { cache: 'no-store' });
+  if (!r.ok) throw new Error(rel + ' HTTP ' + r.status);
+  return r.json();
+}
+function fmtDate(s){ return String(s||'').replace(/-/g,'.'); }
+async function loadLimit() {
+  const info = document.getElementById('limitInfo');
+  if (limitLoaded) return;
+  info.textContent = '加载云端连板索引…';
+  try {
+    limitIndex = await limitFetch('data/limit-index.json');
+    const items = limitIndex.items || [];
+    const strip = document.getElementById('limitStrip');
+    strip.innerHTML = items.map((it,i) =>
+      '<button data-id="' + it.id + '"' + (i===0?' class="on"':'') + ' title="' + (it.capturedAt||it.id) + '">' +
+      fmtDate(it.id.slice(0,10)).slice(5) + '</button>').join('');
+    limitLoaded = true;
+    if (items.length) selectLimit(items[0].id);
+    else info.textContent = '云端暂无连板快照';
+  } catch (e) { info.textContent = '加载失败：' + (e.message||e); }
+}
+async function selectLimit(id) {
+  if (!id) return;
+  document.querySelectorAll('#limitStrip button').forEach(b => b.classList.toggle('on', b.dataset.id === id));
+  const on = document.querySelector('#limitStrip button.on');
+  if (on) on.scrollIntoView({ block:'nearest', inline:'center' });
+  const info = document.getElementById('limitInfo');
+  info.textContent = '加载中…';
+  try {
+    const d = await limitFetch('data/limit/' + encodeURIComponent(id) + '.json');
+    const m = d.sentiment || {};
+    const lv = (k) => m[k] == null ? '-' : m[k];
+    const card = (k, v, cls) => '<div class="lb"><div class="k">'+k+'</div><div class="v '+(cls||'')+'">'+v+'</div></div>';
+    let html = '<div class="limit-summary">' +
+      card('涨停', lv('limitUp'), 'up') + card('跌停', lv('limitDown'), 'down') +
+      card('炸板率', lv('brokenRate') + '%', '') + card('最高板', lv('maxStreak') + '板', '') +
+      card('晋级率', lv('promotionRate') + '%', '') + card('情绪', (m.score==null?'-':m.score) + (m.level? ' · '+m.level : ''), '') +
+      '</div>';
+    const ladder = m.ladder || [];
+    if (ladder.length) {
+      html += '<div class="limit-ladder">';
+      ladder.forEach(t => {
+        const sts = (t.stocks||[]).map(x =>
+          '<span class="st">' + (x.name||x.code) + (x.statLabel ? '<small>'+x.statLabel+'</small>' : '') + '</span>').join('');
+        html += '<div class="limit-tier"><div class="lv">'+(t.streak||'?')+'板<br><small style="font-size:10px;opacity:.6">'+((t.count)||0)+ '只</small></div><div class="lst">'+sts+'</div></div>';
+      });
+      html += '</div>';
+    }
+    document.getElementById('limitBody').innerHTML = html;
+    info.textContent = (d.capturedAt||id) + ' · 交易日 ' + fmtDate(d.tradeDate||'') + ' · 共 ' + (d.limitUp||[]).length + ' 只涨停明细';
+  } catch (e) { info.textContent = '加载失败：' + (e.message||e); }
+}
+const limitStrip = document.getElementById('limitStrip');
+if (limitStrip) limitStrip.addEventListener('click', (ev) => {
+  const b = ev.target.closest('button'); if (b) selectLimit(b.dataset.id);
+});
+const limitLatest = document.getElementById('limitLatest');
+if (limitLatest) limitLatest.addEventListener('click', () => { if (limitIndex && limitIndex.items && limitIndex.items.length) selectLimit(limitIndex.items[0].id); });
 
 /* ---------------- 启动 ---------------- */
 (async function init() {
