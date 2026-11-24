@@ -793,13 +793,26 @@ const snapLatest = document.getElementById('snapLatest');
 if (snapLatest) snapLatest.addEventListener('click', () => { if (feed && feed.times.length) selectSnap(feed.times[0].id); });
 
 /* ---------------- 连板情绪（云端每日收盘快照，读仓库根 data/） ---------------- */
-const LIMIT_CDN = 'https://cdn.jsdelivr.net/gh/DZM520/ths-fupangongju-fuyao-24h@main/';
-let limitIndex = null, limitLoaded = false;
+// 多源：raw 最新无缓存延迟（CORS 全开），jsdelivr 作备份；Pages 只发布 docs/，故读仓库根
+const LIMIT_SOURCES = [
+  'https://raw.githubusercontent.com/DZM520/ths-fupangongju-fuyao-24h/main/',
+  'https://cdn.jsdelivr.net/gh/DZM520/ths-fupangongju-fuyao-24h@main/',
+  'https://fastly.jsdelivr.net/gh/DZM520/ths-fupangongju-fuyao-24h@main/',
+];
+let limitIndex = null, limitLoaded = false, limitBase = '';
 async function limitFetch(rel) {
-  // Pages 只发布 docs/，数据用 jsdelivr 读仓库根；本地 file 打开同样用工 CDN
-  const r = await fetch(LIMIT_CDN + rel, { cache: 'no-store' });
-  if (!r.ok) throw new Error(rel + ' HTTP ' + r.status);
-  return r.json();
+  let lastErr = '';
+  for (const base of LIMIT_SOURCES) {
+    try {
+      const r = await fetch(base + rel, { cache: 'no-store' });
+      if (!r.ok) { lastErr = rel + ' HTTP ' + r.status; continue; }
+      const txt = await r.text();
+      const d = JSON.parse(txt);
+      limitBase = base;
+      return d;
+    } catch (e) { lastErr = e.message; }
+  }
+  throw new Error(lastErr || rel + ' 全部数据源失败');
 }
 function fmtDate(s){ return String(s||'').replace(/-/g,'.'); }
 async function loadLimit() {
