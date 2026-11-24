@@ -1,9 +1,8 @@
 {
-  "updatedAt": "2026-11-24T00:00:21.055Z",
+  "updatedAt": "2026-11-24T01:00:18.450Z",
   "windowHours": 24,
   "topN": 30,
   "times": [
-    "2026-11-23 09:00",
     "2026-11-23 10:00",
     "2026-11-23 11:00",
     "2026-11-23 12:00",
@@ -26,17 +25,52 @@
     "2026-11-24 05:00",
     "2026-11-24 06:00",
     "2026-11-24 07:00",
-    "2026-11-24 08:00"
+    "2026-11-24 08:00",
+    "2026-11-24 09:00"
   ],
-  "total": 63,
+  "total": 60,
   "stocks": [
+    {
+      "ticker": "002242",
+      "name": "九阳股份",
+      "exchange": "深",
+      "color": "#b34a90",
+      "ranks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "lastRank": 1,
+      "lastChangePct": 10.013812,
+      "bestRank": 1
+    },
     {
       "ticker": "002148",
       "name": "北纬科技",
       "exchange": "深",
       "color": "#d4537e",
       "ranks": [
-        1,
         4,
         5,
         5,
@@ -59,45 +93,11 @@
         1,
         1,
         1,
+        1,
         1
       ],
       "lastRank": 1,
-      "lastChangePct": 10.039761,
-      "bestRank": 1
-    },
-    {
-      "ticker": "002242",
-      "name": "九阳股份",
-      "exchange": "深",
-      "color": "#b34a90",
-      "ranks": [
-        4,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "lastRank": 1,
-      "lastChangePct": 10.013812,
+      "lastChangePct": null,
       "bestRank": 1
     },
     {
@@ -106,7 +106,6 @@
       "exchange": "沪",
       "color": "#d85a30",
       "ranks": [
-        10,
         9,
         8,
         9,
@@ -129,10 +128,11 @@
         2,
         2,
         2,
+        2,
         2
       ],
       "lastRank": 2,
-      "lastChangePct": 4.014599,
+      "lastChangePct": null,
       "bestRank": 2
     },
     {
@@ -141,7 +141,6 @@
       "exchange": "沪",
       "color": "#85b7eb",
       "ranks": [
-        11,
         18,
         15,
         15,
@@ -164,10 +163,11 @@
         3,
         3,
         3,
+        3,
         3
       ],
       "lastRank": 3,
-      "lastChangePct": -2.659574,
+      "lastChangePct": null,
       "bestRank": 3
     },
     {
@@ -176,7 +176,6 @@
       "exchange": "深",
       "color": "#7f77dd",
       "ranks": [
-        15,
         12,
         16,
         14,
@@ -199,10 +198,11 @@
         4,
         4,
         4,
+        4,
         4
       ],
       "lastRank": 4,
-      "lastChangePct": 5.724852,
+      "lastChangePct": null,
       "bestRank": 4
     },
     {
@@ -211,7 +211,6 @@
       "exchange": "深",
       "color": "#1d9e75",
       "ranks": [
-        13,
         10,
         11,
         11,
@@ -234,10 +233,11 @@
         5,
         5,
         5,
+        5,
         5
       ],
       "lastRank": 5,
-      "lastChangePct": 6.103764,
+      "lastChangePct": null,
       "bestRank": 5
     },
     {
@@ -246,7 +246,6 @@
       "exchange": "深",
       "color": "#4a1b0c",
       "ranks": [
-        29,
         null,
         null,
         null,
@@ -269,10 +268,11 @@
         6,
         6,
         6,
+        6,
         6
       ],
       "lastRank": 6,
-      "lastChangePct": 19.996619,
+      "lastChangePct": null,
       "bestRank": 6
     },
     {
@@ -281,7 +281,6 @@
       "exchange": "深",
       "color": "#712b13",
       "ranks": [
-        3,
         5,
         7,
         7,
@@ -294,6 +293,7 @@
         2,
         2,
         7,
+        null,
         null,
         null,
         null,
@@ -319,7 +319,6 @@
         null,
         null,
         null,
-        null,
         29,
         26,
         19,
@@ -339,10 +338,11 @@
         7,
         7,
         7,
+        7,
         7
       ],
       "lastRank": 7,
-      "lastChangePct": 9.995296,
+      "lastChangePct": null,
       "bestRank": 7
     },
     {
@@ -351,7 +351,6 @@
       "exchange": "深",
       "color": "#ba7517",
       "ranks": [
-        5,
         2,
         2,
         2,
@@ -364,6 +363,7 @@
         3,
         3,
         8,
+        null,
         null,
         null,
         null,
@@ -388,7 +388,6 @@
       "ranks": [
         null,
         null,
-        null,
         22,
         20,
         22,
@@ -409,10 +408,11 @@
         8,
         8,
         8,
+        8,
         8
       ],
       "lastRank": 8,
-      "lastChangePct": 7.857912,
+      "lastChangePct": null,
       "bestRank": 8
     },
     {
@@ -421,7 +421,6 @@
       "exchange": "沪",
       "color": "#4a1b0c",
       "ranks": [
-        6,
         7,
         9,
         6,
@@ -434,6 +433,7 @@
         5,
         5,
         9,
+        null,
         null,
         null,
         null,
@@ -458,7 +458,6 @@
       "ranks": [
         null,
         null,
-        null,
         19,
         21,
         24,
@@ -479,10 +478,11 @@
         9,
         9,
         9,
+        9,
         9
       ],
       "lastRank": 9,
-      "lastChangePct": 9.939759,
+      "lastChangePct": null,
       "bestRank": 9
     },
     {
@@ -491,7 +491,6 @@
       "exchange": "沪",
       "color": "#1d9e75",
       "ranks": [
-        null,
         17,
         17,
         18,
@@ -514,10 +513,11 @@
         10,
         10,
         10,
+        10,
         10
       ],
       "lastRank": 10,
-      "lastChangePct": 5.708245,
+      "lastChangePct": null,
       "bestRank": 10
     },
     {
@@ -526,7 +526,6 @@
       "exchange": "沪",
       "color": "#639922",
       "ranks": [
-        20,
         27,
         27,
         null,
@@ -549,10 +548,11 @@
         11,
         11,
         11,
+        11,
         11
       ],
       "lastRank": 11,
-      "lastChangePct": 9.937888,
+      "lastChangePct": null,
       "bestRank": 11
     },
     {
@@ -561,7 +561,6 @@
       "exchange": "沪",
       "color": "#f09595",
       "ranks": [
-        null,
         null,
         null,
         null,
@@ -584,10 +583,11 @@
         12,
         12,
         12,
+        12,
         12
       ],
       "lastRank": 12,
-      "lastChangePct": 9.997831,
+      "lastChangePct": null,
       "bestRank": 12
     },
     {
@@ -596,7 +596,6 @@
       "exchange": "深",
       "color": "#854f0b",
       "ranks": [
-        2,
         3,
         4,
         4,
@@ -619,11 +618,12 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 13,
       "lastChangePct": 10.007468,
-      "bestRank": 2
+      "bestRank": 3
     },
     {
       "ticker": "002724",
@@ -631,7 +631,6 @@
       "exchange": "深",
       "color": "#d4537e",
       "ranks": [
-        null,
         null,
         null,
         null,
@@ -654,10 +653,11 @@
         13,
         13,
         13,
+        13,
         13
       ],
       "lastRank": 13,
-      "lastChangePct": 9.965636,
+      "lastChangePct": null,
       "bestRank": 13
     },
     {
@@ -677,8 +677,8 @@
         null,
         null,
         null,
-        null,
         24,
+        14,
         14,
         14,
         14,
@@ -692,7 +692,7 @@
         14
       ],
       "lastRank": 14,
-      "lastChangePct": 6.115108,
+      "lastChangePct": null,
       "bestRank": 14
     },
     {
@@ -701,7 +701,6 @@
       "exchange": "沪",
       "color": "#3c3489",
       "ranks": [
-        25,
         21,
         20,
         23,
@@ -714,6 +713,7 @@
         9,
         9,
         15,
+        null,
         null,
         null,
         null,
@@ -747,8 +747,8 @@
         null,
         null,
         null,
-        null,
         25,
+        15,
         15,
         15,
         15,
@@ -762,7 +762,7 @@
         15
       ],
       "lastRank": 15,
-      "lastChangePct": 0.772201,
+      "lastChangePct": null,
       "bestRank": 15
     },
     {
@@ -771,7 +771,6 @@
       "exchange": "深",
       "color": "#993556",
       "ranks": [
-        8,
         6,
         3,
         3,
@@ -784,6 +783,7 @@
         8,
         8,
         16,
+        null,
         null,
         null,
         null,
@@ -817,8 +817,8 @@
         null,
         null,
         null,
-        null,
         26,
+        16,
         16,
         16,
         16,
@@ -832,7 +832,7 @@
         16
       ],
       "lastRank": 16,
-      "lastChangePct": 10,
+      "lastChangePct": null,
       "bestRank": 16
     },
     {
@@ -841,7 +841,6 @@
       "exchange": "深",
       "color": "#d4537e",
       "ranks": [
-        null,
         null,
         null,
         null,
@@ -864,10 +863,11 @@
         17,
         17,
         17,
+        17,
         17
       ],
       "lastRank": 17,
-      "lastChangePct": 10.018975,
+      "lastChangePct": null,
       "bestRank": 17
     },
     {
@@ -876,7 +876,6 @@
       "exchange": "沪",
       "color": "#ed93b1",
       "ranks": [
-        null,
         25,
         28,
         null,
@@ -899,46 +898,12 @@
         18,
         18,
         18,
+        18,
         18
       ],
       "lastRank": 18,
-      "lastChangePct": 0.942793,
-      "bestRank": 18
-    },
-    {
-      "ticker": "002741",
-      "name": "光华科技",
-      "exchange": "深",
-      "color": "#1d9e75",
-      "ranks": [
-        19,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "lastRank": 19,
       "lastChangePct": null,
-      "bestRank": 19
+      "bestRank": 18
     },
     {
       "ticker": "300502",
@@ -946,7 +911,6 @@
       "exchange": "深",
       "color": "#b34a90",
       "ranks": [
-        24,
         22,
         13,
         10,
@@ -959,6 +923,7 @@
         10,
         10,
         19,
+        null,
         null,
         null,
         null,
@@ -993,7 +958,7 @@
         null,
         null,
         null,
-        null,
+        19,
         19,
         19,
         19,
@@ -1007,7 +972,7 @@
         19
       ],
       "lastRank": 19,
-      "lastChangePct": 5.624297,
+      "lastChangePct": null,
       "bestRank": 19
     },
     {
@@ -1016,7 +981,6 @@
       "exchange": "深",
       "color": "#993556",
       "ranks": [
-        16,
         13,
         10,
         13,
@@ -1029,6 +993,7 @@
         11,
         11,
         20,
+        null,
         null,
         null,
         null,
@@ -1051,10 +1016,10 @@
       "exchange": "深",
       "color": "#1d9e75",
       "ranks": [
-        17,
         23,
         18,
         20,
+        null,
         null,
         null,
         null,
@@ -1078,7 +1043,7 @@
       ],
       "lastRank": 20,
       "lastChangePct": 10.055096,
-      "bestRank": 17
+      "bestRank": 18
     },
     {
       "ticker": "600261",
@@ -1086,7 +1051,6 @@
       "exchange": "沪",
       "color": "#d4537e",
       "ranks": [
-        null,
         24,
         25,
         26,
@@ -1098,6 +1062,7 @@
         20,
         21,
         20,
+        null,
         null,
         null,
         null,
@@ -1133,7 +1098,7 @@
         null,
         null,
         null,
-        null,
+        20,
         20,
         20,
         20,
@@ -1147,43 +1112,8 @@
         20
       ],
       "lastRank": 20,
-      "lastChangePct": -2.899687,
-      "bestRank": 20
-    },
-    {
-      "ticker": "603466",
-      "name": "风语筑",
-      "exchange": "沪",
-      "color": "#5f5e5a",
-      "ranks": [
-        21,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "lastRank": 21,
       "lastChangePct": null,
-      "bestRank": 21
+      "bestRank": 20
     },
     {
       "ticker": "002156",
@@ -1191,10 +1121,10 @@
       "exchange": "深",
       "color": "#1d9e75",
       "ranks": [
-        null,
         20,
         14,
         21,
+        null,
         null,
         null,
         null,
@@ -1238,7 +1168,7 @@
         null,
         null,
         null,
-        null,
+        21,
         21,
         21,
         21,
@@ -1252,7 +1182,7 @@
         21
       ],
       "lastRank": 21,
-      "lastChangePct": 9.968847,
+      "lastChangePct": null,
       "bestRank": 21
     },
     {
@@ -1261,7 +1191,6 @@
       "exchange": "沪",
       "color": "#26215c",
       "ranks": [
-        null,
         30,
         30,
         17,
@@ -1274,6 +1203,7 @@
         15,
         15,
         22,
+        null,
         null,
         null,
         null,
@@ -1308,7 +1238,7 @@
         null,
         null,
         null,
-        null,
+        22,
         22,
         22,
         22,
@@ -1322,7 +1252,7 @@
         22
       ],
       "lastRank": 22,
-      "lastChangePct": 20,
+      "lastChangePct": null,
       "bestRank": 22
     },
     {
@@ -1331,9 +1261,9 @@
       "exchange": "深",
       "color": "#e24b4a",
       "ranks": [
-        null,
         19,
         23,
+        null,
         null,
         null,
         null,
@@ -1378,7 +1308,7 @@
         null,
         null,
         null,
-        null,
+        23,
         23,
         23,
         23,
@@ -1392,7 +1322,7 @@
         23
       ],
       "lastRank": 23,
-      "lastChangePct": -5.219365,
+      "lastChangePct": null,
       "bestRank": 23
     },
     {
@@ -1413,7 +1343,7 @@
         null,
         null,
         null,
-        null,
+        24,
         24,
         24,
         24,
@@ -1427,7 +1357,7 @@
         24
       ],
       "lastRank": 24,
-      "lastChangePct": 10.085837,
+      "lastChangePct": null,
       "bestRank": 24
     },
     {
@@ -1436,7 +1366,6 @@
       "exchange": "深",
       "color": "#1d9e75",
       "ranks": [
-        18,
         28,
         29,
         24,
@@ -1459,11 +1388,12 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 25,
       "lastChangePct": -1.257396,
-      "bestRank": 18
+      "bestRank": 24
     },
     {
       "ticker": "601899",
@@ -1471,10 +1401,10 @@
       "exchange": "沪",
       "color": "#a32d2d",
       "ranks": [
-        22,
         29,
         24,
         25,
+        null,
         null,
         null,
         null,
@@ -1498,7 +1428,7 @@
       ],
       "lastRank": 25,
       "lastChangePct": 2.275601,
-      "bestRank": 22
+      "bestRank": 24
     },
     {
       "ticker": "688981",
@@ -1518,7 +1448,7 @@
         null,
         null,
         null,
-        null,
+        25,
         25,
         25,
         25,
@@ -1532,78 +1462,8 @@
         25
       ],
       "lastRank": 25,
-      "lastChangePct": -3.076678,
+      "lastChangePct": null,
       "bestRank": 25
-    },
-    {
-      "ticker": "000711",
-      "name": "京蓝科技",
-      "exchange": "深",
-      "color": "#26215c",
-      "ranks": [
-        23,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        28,
-        26,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "lastRank": 26,
-      "lastChangePct": 10.103627,
-      "bestRank": 23
-    },
-    {
-      "ticker": "600900",
-      "name": "长江电力",
-      "exchange": "沪",
-      "color": "#d4537e",
-      "ranks": [
-        30,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        26,
-        26,
-        26,
-        26,
-        26,
-        26,
-        26,
-        26,
-        26,
-        26,
-        26
-      ],
-      "lastRank": 26,
-      "lastChangePct": -0.85389,
-      "bestRank": 26
     },
     {
       "ticker": "000593",
@@ -1612,8 +1472,8 @@
       "color": "#7f77dd",
       "ranks": [
         null,
-        null,
         26,
+        null,
         null,
         null,
         null,
@@ -1641,12 +1501,81 @@
       "bestRank": 26
     },
     {
+      "ticker": "000711",
+      "name": "京蓝科技",
+      "exchange": "深",
+      "color": "#26215c",
+      "ranks": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        28,
+        26,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "lastRank": 26,
+      "lastChangePct": 10.103627,
+      "bestRank": 26
+    },
+    {
+      "ticker": "600900",
+      "name": "长江电力",
+      "exchange": "沪",
+      "color": "#d4537e",
+      "ranks": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26
+      ],
+      "lastRank": 26,
+      "lastChangePct": null,
+      "bestRank": 26
+    },
+    {
       "ticker": "000823",
       "name": "超声电子",
       "exchange": "深",
       "color": "#378add",
       "ranks": [
-        9,
         11,
         12,
         12,
@@ -1669,11 +1598,12 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 27,
       "lastChangePct": 7.455429,
-      "bestRank": 9
+      "bestRank": 11
     },
     {
       "ticker": "600467",
@@ -1681,7 +1611,6 @@
       "exchange": "沪",
       "color": "#854f0b",
       "ranks": [
-        12,
         16,
         22,
         16,
@@ -1704,11 +1633,12 @@
         null,
         null,
         null,
+        null,
         null
       ],
       "lastRank": 27,
       "lastChangePct": 10.13986,
-      "bestRank": 12
+      "bestRank": 16
     },
     {
       "ticker": "603960",
@@ -1716,10 +1646,10 @@
       "exchange": "沪",
       "color": "#3c3489",
       "ranks": [
-        null,
         26,
         19,
         27,
+        null,
         null,
         null,
         null,
@@ -1754,10 +1684,10 @@
         null,
         null,
         null,
-        null,
         18,
         20,
         27,
+        null,
         null,
         null,
         null,
@@ -1789,13 +1719,13 @@
         null,
         null,
         null,
-        null,
         28,
         25,
         24,
         26,
         24,
         27,
+        null,
         null,
         null,
         null,
@@ -1833,7 +1763,7 @@
         null,
         null,
         null,
-        null,
+        27,
         27,
         27,
         27,
@@ -1847,43 +1777,8 @@
         27
       ],
       "lastRank": 27,
-      "lastChangePct": 10.006627,
-      "bestRank": 27
-    },
-    {
-      "ticker": "600360",
-      "name": "华微电子",
-      "exchange": "沪",
-      "color": "#d4537e",
-      "ranks": [
-        28,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "lastRank": 28,
       "lastChangePct": null,
-      "bestRank": 28
+      "bestRank": 27
     },
     {
       "ticker": "300085",
@@ -1893,7 +1788,6 @@
       "ranks": [
         null,
         null,
-        null,
         28,
         null,
         null,
@@ -1904,6 +1798,7 @@
         null,
         null,
         null,
+        28,
         28,
         28,
         28,
@@ -1917,7 +1812,7 @@
         28
       ],
       "lastRank": 28,
-      "lastChangePct": 6.518519,
+      "lastChangePct": null,
       "bestRank": 28
     },
     {
@@ -1929,13 +1824,13 @@
         null,
         null,
         null,
-        null,
         22,
         18,
         20,
         24,
         27,
         28,
+        null,
         null,
         null,
         null,
@@ -1964,7 +1859,6 @@
         null,
         null,
         null,
-        null,
         23,
         21,
         23,
@@ -1973,6 +1867,7 @@
         24,
         27,
         28,
+        null,
         null,
         null,
         null,
@@ -1996,7 +1891,6 @@
       "exchange": "深",
       "color": "#7f77dd",
       "ranks": [
-        7,
         8,
         6,
         8,
@@ -2009,6 +1903,7 @@
         17,
         17,
         29,
+        null,
         null,
         null,
         null,
@@ -2032,7 +1927,6 @@
       "color": "#639922",
       "ranks": [
         14,
-        14,
         21,
         29,
         null,
@@ -2043,6 +1937,7 @@
         29,
         24,
         29,
+        null,
         null,
         null,
         null,
@@ -2069,10 +1964,10 @@
         null,
         null,
         null,
-        null,
         27,
         28,
         29,
+        null,
         null,
         null,
         null,
@@ -2113,7 +2008,7 @@
         null,
         null,
         null,
-        null,
+        29,
         29,
         29,
         29,
@@ -2127,7 +2022,7 @@
         29
       ],
       "lastRank": 29,
-      "lastChangePct": 7.577175,
+      "lastChangePct": null,
       "bestRank": 29
     },
     {
@@ -2136,10 +2031,10 @@
       "exchange": "沪",
       "color": "#5dcaa5",
       "ranks": [
-        26,
         15,
         null,
         30,
+        null,
         null,
         null,
         null,
@@ -2171,7 +2066,6 @@
       "exchange": "沪",
       "color": "#0c447c",
       "ranks": [
-        27,
         null,
         null,
         null,
@@ -2183,6 +2077,7 @@
         30,
         30,
         30,
+        null,
         null,
         null,
         null,
@@ -2198,7 +2093,7 @@
       ],
       "lastRank": 30,
       "lastChangePct": 2.104664,
-      "bestRank": 27
+      "bestRank": 30
     },
     {
       "ticker": "300750",
@@ -2218,7 +2113,7 @@
         null,
         null,
         null,
-        null,
+        30,
         30,
         30,
         30,
@@ -2232,7 +2127,7 @@
         30
       ],
       "lastRank": 30,
-      "lastChangePct": -0.171218,
+      "lastChangePct": null,
       "bestRank": 30
     }
   ]
