@@ -615,7 +615,7 @@ async function fetchSnapshot(now = new Date()) {
     capturedAtIso: now.toISOString(),
     tradeDate,
     yesterdayTradeDate: yesterdayDate,
-    staleDays: Math.max(0, Math.round((now - new Date(
+    staleDays: Math.max(0, Math.floor((now - new Date(
       parseInt(tradeDate.slice(0, 4), 10),
       parseInt(tradeDate.slice(4, 6), 10) - 1,
       parseInt(tradeDate.slice(6, 8), 10)
