@@ -95,7 +95,9 @@ try {
   const m = snap.sentiment || {};
   // 交易日判断：东财节假日回退到最近交易日（staleDays>0 / tradeDate≠今天）则非交易日，不保存
   const todayCompact = t.date.replace(/-/g, '');
-  const tradeDay = String(snap.tradeDate || '').replace(/-/g, '') === todayCompact && !(snap.staleDays > 0);
+  // staleDays 按毫秒差 round，当天 12 点后就会变 1，不能用来判断交易日；
+  // 交易日只认快照 tradeDate 是否等于今天（节假日东财会回退到旧交易日，td 自然不等）。
+  const tradeDay = String(snap.tradeDate || '').replace(/-/g, '') === todayCompact;
 
   if (!tradeDay) {
     console.log(`[skip] 今日非交易日（tradeDate=${snap.tradeDate}, staleDays=${snap.staleDays}），不保存`);
