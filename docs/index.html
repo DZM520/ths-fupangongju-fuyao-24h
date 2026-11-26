@@ -26,7 +26,16 @@
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
     line-height: 1.6;
   }
-  .wrap { max-width: 1560px; margin: 0 auto; padding: 28px 24px 40px; }
+  .shell{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;max-width:1560px;margin:0 auto;align-items:start;padding:28px 24px 40px}
+  .main{min-width:0}
+  /* 左侧栏：榜单明细树状列表（PC 常驻，≤980px 抽屉） */
+  .sidebar{position:sticky;top:16px;height:calc(100vh - 32px);display:flex;flex-direction:column;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 10px 8px;overflow:hidden;box-shadow:var(--shadow)}
+  .side-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 4px 8px}
+  .side-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:.3px}
+  .side-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .sidebar .snap-tree{flex:1 1 auto;max-height:none;margin-bottom:0;overflow-y:auto}
+  .drawer-mask,.drawer-handle,.drawer-close{display:none}
 
   /* ---- 头部 ---- */
   header { margin-bottom: 18px; }
@@ -213,10 +222,41 @@
   .range-note { font-size:11.5px; color:var(--muted); margin:6px 0 0; line-height:1.7; }
   .loading-tip { padding:40px 10px; text-align:center; color:var(--muted); font-size:13px; }
   .focus-hint { font-size:12px; color:var(--accent); margin-left:4px; }
+
+  /* ---- 左侧栏降级为抽屉（≤980px） ---- */
+  @media (max-width: 980px) {
+    .shell{grid-template-columns:minmax(0,1fr);padding:20px 14px 32px}
+    .sidebar{position:fixed;left:0;top:0;bottom:0;width:min(84vw,320px);height:100vh;z-index:45;
+      overflow:auto;background:var(--card);border:1px solid var(--border);border-left:none;
+      border-radius:0 14px 14px 0;padding:12px 10px 8px;transform:translateX(-104%);transition:transform .22s ease}
+    .sidebar.open{transform:translateX(0);box-shadow:14px 0 44px rgba(0,0,0,.25)}
+    .drawer-mask{position:fixed;inset:0;background:rgba(3,8,16,.42);z-index:44;display:none}
+    .drawer-mask.on{display:block}
+    .drawer-close{display:block;width:100%;margin:0 0 10px;padding:8px;border-radius:8px;cursor:pointer;
+      background:var(--accent-weak);border:1px solid var(--border);color:var(--accent);font-size:12px}
+    .drawer-handle{position:fixed;left:0;top:44%;width:16px;height:52px;z-index:43;display:flex;
+      align-items:center;justify-content:center;border-radius:0 8px 8px 0;cursor:pointer;
+      background:var(--card);border:1px solid var(--border);border-left:none;
+      color:var(--muted);font-size:13px;opacity:.75;transition:opacity .2s}
+    .drawer-handle:hover{opacity:1;color:var(--accent)}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="shell">
+  <aside class="sidebar" id="snapSidebar">
+    <div class="side-head">
+      <div>
+        <div class="side-title">榜单明细</div>
+        <div class="side-sub" id="snapCount">按时刻查看</div>
+      </div>
+    </div>
+    <button class="drawer-close" id="drawerClose" type="button">收起记录列表</button>
+    <div class="snap-tree" id="snapTree"></div>
+  </aside>
+  <div class="drawer-mask" id="drawerMask"></div>
+  <div class="drawer-handle" id="drawerHandle">›</div>
+  <main class="main">
   <header>
     <div class="head-top">
       <div>
@@ -283,8 +323,6 @@
 
     <div class="card panel-snap" id="snapCard" hidden>
       <h2>榜单明细</h2>
-      <div class="legend-hint">按天展开，点选时刻查看当时完整的 100 只热榜股票</div>
-      <div class="snap-tree" id="snapTree"></div>
       <span class="snap-info" id="snapInfo"></span>
       <div class="tablewrap">
         <table>
@@ -312,6 +350,7 @@
   </div>
 
   <div class="footer">数据来源：同花顺热榜 · 每小时自动记录 · docs/bump.json + docs/records/</div>
+  </main>
 </div>
 
 <script>
@@ -787,6 +826,8 @@ function buildSnapTree() {
     html += '</div>';
   });
   tree.innerHTML = html;
+  const cntEl = document.getElementById('snapCount');
+  if (cntEl) cntEl.textContent = '共 ' + feed.times.length + ' 档';
 }
 async function selectSnap(id) {
   if (!id) return;
@@ -823,8 +864,46 @@ if (snapTree) snapTree.addEventListener('click', (ev) => {
     return;
   }
   const tm = ev.target.closest('.tree-time');
-  if (tm) selectSnap(tm.dataset.id);
+  if (tm) {
+    selectSnap(tm.dataset.id);
+    const v = panels.dataset.view;
+    if (v === 'chart' || v === 'limit') setView('split', false); // 确保选中表格可见
+    if (window.matchMedia && window.matchMedia('(max-width:980px)').matches && window.__snapSetDrawer) window.__snapSetDrawer(false);
+  }
 });
+
+/* ---------------- 左侧栏抽屉（≤980px） ---------------- */
+(function(){
+  const sidebar = document.getElementById('snapSidebar');
+  const mask = document.getElementById('drawerMask');
+  const handle = document.getElementById('drawerHandle');
+  const closeBtn = document.getElementById('drawerClose');
+  if (!sidebar || !mask || !handle) return;
+  let open = false;
+  function setDrawer(on){
+    open = on;
+    sidebar.classList.toggle('open', on);
+    mask.classList.toggle('on', on);
+    handle.style.opacity = on ? '0' : '';
+  }
+  handle.addEventListener('click', ()=>setDrawer(true));
+  if (closeBtn) closeBtn.addEventListener('click', ()=>setDrawer(false));
+  mask.addEventListener('click', ()=>setDrawer(false));
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && open) setDrawer(false); });
+  let sx=0, sy=0, swiping=false;
+  document.addEventListener('touchstart',(e)=>{
+    if(open||!e.touches.length) return;
+    const tt=e.touches[0];
+    if(tt.clientX<=26){ swiping=true; sx=tt.clientX; sy=tt.clientY; }
+  },{passive:true});
+  document.addEventListener('touchmove',(e)=>{
+    if(!swiping||!e.touches.length) return;
+    const tt=e.touches[0];
+    if(Math.abs(tt.clientY-sy)>45){ swiping=false; return; }
+    if(tt.clientX-sx>60){ setDrawer(true); swiping=false; }
+  },{passive:true});
+  window.__snapSetDrawer = setDrawer;
+})();
 
 /* ---------------- 连板情绪（云端每日收盘快照，读仓库根 data/） ---------------- */
 // 多源：raw 最新无缓存延迟（CORS 全开），jsdelivr 作备份；Pages 只发布 docs/，故读仓库根
